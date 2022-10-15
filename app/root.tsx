@@ -1,9 +1,10 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
-import styles from "./styles/app.css"
+import styles from "./styles/app.css";
+import globalStyles from "./styles/global.css";
 
 export function links() {
-  return [{ rel: "stylesheet", href: styles }]
+  return [{ rel: "stylesheet", href: styles }, { rel: "stylesheet", href: globalStyles }, { rel: "" }];
 }
 
 export const meta: MetaFunction = () => ({
@@ -18,6 +19,7 @@ export default function App() {
       <head>
         <Meta />
         <Links />
+        <script src="https://kit.fontawesome.com/f700e25574.js" crossOrigin="anonymous"></script>
       </head>
       <body>
         <Outlet />
