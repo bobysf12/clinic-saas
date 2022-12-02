@@ -1,0 +1,60 @@
+{
+  "kind": "collectionType",
+  "collectionName": "patient_records",
+  "info": {
+    "singularName": "patient-record",
+    "pluralName": "patient-records",
+    "displayName": "PatientRecord",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "attachments": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "patient": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::patient.patient"
+    },
+    "patient_record_inventories": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::patient-record-inventory.patient-record-inventory",
+      "mappedBy": "patient_record"
+    },
+    "subjective": {
+      "type": "richtext"
+    },
+    "objective": {
+      "type": "richtext"
+    },
+    "assessment": {
+      "type": "richtext"
+    },
+    "plan": {
+      "type": "richtext"
+    },
+    "doctor": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::doctor.doctor"
+    },
+    "patient_record_medical_treatments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::patient-record-medical-treatment.patient-record-medical-treatment"
+    }
+  }
+}

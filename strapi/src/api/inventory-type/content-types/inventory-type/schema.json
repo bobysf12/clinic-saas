@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inventory_types",
+  "info": {
+    "singularName": "inventory-type",
+    "pluralName": "inventory-types",
+    "displayName": "Inventory Type",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    }
+  }
+}

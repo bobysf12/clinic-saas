@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "patient_record_inventories",
+  "info": {
+    "singularName": "patient-record-inventory",
+    "pluralName": "patient-record-inventories",
+    "displayName": "Patient Record Inventory",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "patient_record": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::patient-record.patient-record",
+      "inversedBy": "patient_record_inventories"
+    },
+    "qty": {
+      "type": "integer"
+    },
+    "price": {
+      "type": "decimal"
+    },
+    "description": {
+      "type": "string"
+    },
+    "inventory": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::inventory.inventory"
+    }
+  }
+}

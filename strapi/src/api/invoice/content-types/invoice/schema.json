@@ -1,0 +1,58 @@
+{
+  "kind": "collectionType",
+  "collectionName": "invoices",
+  "info": {
+    "singularName": "invoice",
+    "pluralName": "invoices",
+    "displayName": "Invoice"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "patient": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::patient.patient"
+    },
+    "paid_at": {
+      "type": "datetime"
+    },
+    "bill_amount": {
+      "type": "decimal"
+    },
+    "paid_amount": {
+      "type": "decimal"
+    },
+    "outpatient": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::outpatient.outpatient"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "payor_information": {
+      "type": "json"
+    },
+    "payment_type": {
+      "type": "enumeration",
+      "enum": [
+        "cash",
+        "credit_card",
+        "debit_card",
+        "e_wallet",
+        "qris"
+      ],
+      "default": "cash"
+    },
+    "invoice_type": {
+      "type": "enumeration",
+      "enum": [
+        "outpatient"
+      ],
+      "default": "outpatient"
+    }
+  }
+}
