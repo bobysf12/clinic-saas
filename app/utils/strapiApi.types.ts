@@ -39,6 +39,10 @@ export interface StrapiRequestOption {
    * https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest/filtering-locale-publication.html#filtering
    */
   filters?: Object;
+  /**
+   * https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest/populating-fields.html#relation-media-fields
+   */
+  populate?: Object;
   pagination?: {
     page?: number;
     pageSize?: number;
@@ -58,10 +62,23 @@ export enum Gender {
 }
 
 export type Patient = StrapiEntry<{
-  id: number;
   name: string;
   dob: string;
   address: string;
   phone: string;
   gender: Gender;
+}>;
+
+export type InventoryType = StrapiEntry<{
+  name: string;
+  description: string;
+}>;
+
+export type Inventory = StrapiEntry<{
+  name: string;
+  description: string;
+  unit_in_stock: number;
+  qty_per_unit: number;
+  inventory_type: InventoryType;
+  price: number;
 }>;

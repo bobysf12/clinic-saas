@@ -37,6 +37,9 @@ export default function App() {
           <MenuItem to="/app/patients" iconClassName="fa-solid fa-person">
             Patients
           </MenuItem>
+          <MenuItem to="/app/inventories" iconClassName="fa-solid fa-person">
+            Inventories
+          </MenuItem>
           <MenuItem to="/app/settings" iconClassName="fa-solid fa-gear">
             Settings
           </MenuItem>

@@ -1,5 +1,5 @@
 import qs from "qs";
-import type { Patient, StrapiRequestOption, StrapiResponse } from "./strapiApi.types";
+import type { Inventory, Patient, StrapiRequestOption, StrapiResponse } from "./strapiApi.types";
 import { StrapiRequestError } from "./strapiApi.types";
 
 let baseUrl = process.env.STRAPI_BASE_URL;
@@ -73,26 +73,16 @@ const generateStrapiQueryString = (option?: StrapiRequestOption) => {
   if (!option) {
     return "";
   }
-  let q = new URLSearchParams();
-  if (option.pagination) {
-    const { page, pageSize } = option.pagination;
-    page && q.append("pagination[page]", page.toString());
-    pageSize && q.append("pagination[pageSize]", pageSize.toString());
-  }
-
-  // if (option.filters) {}
-
   const query = qs.stringify(
     {
       pagination: option.pagination,
       filters: option.filters,
+      populate: option.populate,
     },
     {
       encodeValuesOnly: true, // prettify URL
     }
   );
-
-  // return q.toString();
 
   return query;
 };
@@ -138,5 +128,11 @@ export const patientApi = {
   },
   async deletePatient(token: string, id: number): Promise<StrapiResponse<Patient>> {
     return httpDelete(token, "/api/patients/" + id);
+  },
+};
+
+export const inventoryApi = {
+  async getInventories(token: string, option?: StrapiRequestOption): Promise<StrapiResponse<Inventory[]>> {
+    return httpGet(token, "/api/inventories?" + generateStrapiQueryString(option));
   },
 };

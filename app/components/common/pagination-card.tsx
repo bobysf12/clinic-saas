@@ -11,7 +11,7 @@ type Props = {
 
 export const PaginationCard = ({ goToNextPage, goToPrevPage, page, pageSize, pageItems, totalItems }: Props) => {
   const firstItemNumber = (page - 1) * pageSize + 1;
-  const lastItemNumber = pageItems < totalItems ? firstItemNumber + pageItems - 1 : firstItemNumber + pageSize - 1;
+  const lastItemNumber = pageItems < totalItems ? firstItemNumber + pageItems - 1 : firstItemNumber + pageItems - 1;
   return (
     <Card className="mt-6">
       <div className="inline-flex space-x-6 mr-6">
