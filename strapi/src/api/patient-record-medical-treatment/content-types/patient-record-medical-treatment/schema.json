@@ -4,20 +4,18 @@
   "info": {
     "singularName": "patient-record-medical-treatment",
     "pluralName": "patient-record-medical-treatments",
-    "displayName": "Patient Record Medical Treatment"
+    "displayName": "Patient Record Medical Treatment",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
-    "medical_treatments": {
+    "medical_treatment": {
       "type": "relation",
-      "relation": "oneToMany",
+      "relation": "oneToOne",
       "target": "api::medical-treatment.medical-treatment"
-    },
-    "name": {
-      "type": "string"
     },
     "price": {
       "type": "float"

@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "medical_treatment_packages",
+  "info": {
+    "singularName": "medical-treatment-package",
+    "pluralName": "medical-treatment-packages",
+    "displayName": "Medical Treatment Package"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "medical_treatment": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::medical-treatment.medical-treatment"
+    },
+    "inventory": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::inventory.inventory"
+    },
+    "qty": {
+      "type": "integer"
+    },
+    "description": {
+      "type": "text"
+    }
+  }
+}

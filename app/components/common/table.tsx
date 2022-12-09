@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { HTMLAttributes } from "react";
+import { HTMLAttributes, TdHTMLAttributes } from "react";
 import { Card } from "./card";
 
 export const TableContainer = ({ className, ...props }: HTMLAttributes<HTMLDivElement>) => {
@@ -24,6 +24,6 @@ export const TableBodyRow = ({ className, ...props }: HTMLAttributes<HTMLTableRo
   return <tr className={clsx("border-b", className)} {...props} />;
 };
 
-export const TableCol = ({ className, ...props }: HTMLAttributes<HTMLTableCellElement>) => {
+export const TableCol = ({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) => {
   return <td className={clsx("px-6 py-3", className)} {...props} />;
 };

@@ -4,7 +4,8 @@
   "info": {
     "singularName": "invoice",
     "pluralName": "invoices",
-    "displayName": "Invoice"
+    "displayName": "Invoice",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -53,6 +54,11 @@
         "outpatient"
       ],
       "default": "outpatient"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::organization.organization"
     }
   }
 }

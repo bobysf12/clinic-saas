@@ -1,5 +1,5 @@
 import { json, LoaderFunction } from "@remix-run/node";
-import { Outlet } from "@remix-run/react";
+import { Outlet, useLoaderData } from "@remix-run/react";
 import { requireAuthenticatedUser } from "~/utils/session.server";
 import styles from "~/styles/dashboard.css";
 import MenuItem from "~/components/Sidebar/MenuItem";
@@ -15,14 +15,16 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function App() {
+  const { user } = useLoaderData();
   return (
     <div>
       <nav
         className="fixed top-0 left-0 w-full h-16 flex flex-row items-center px-6"
         style={{ backgroundColor: "var(--app-bg-color)" }}
       >
-        <span className="text-xl font-bold">Remix Starter Dashboard</span>
+        <span className="text-xl font-bold">{user.organization.name}</span>
         <div className="flex-1" />
+        <span className="font-medium mr-2">{user.username}</span>
         <form action="/logout" method="post">
           <button className="font-bold uppercase" type="submit">
             Logout
@@ -34,11 +36,14 @@ export default function App() {
           <MenuItem to="/app" iconClassName="fa-solid fa-house">
             Dashboard
           </MenuItem>
+          <MenuItem to="/app/outpatients" iconClassName="fa-solid fa-person">
+            Rawat Jalan
+          </MenuItem>
           <MenuItem to="/app/patients" iconClassName="fa-solid fa-person">
-            Patients
+            Pasien
           </MenuItem>
           <MenuItem to="/app/inventories" iconClassName="fa-solid fa-person">
-            Inventories
+            Inventori
           </MenuItem>
           <MenuItem to="/app/settings" iconClassName="fa-solid fa-gear">
             Settings

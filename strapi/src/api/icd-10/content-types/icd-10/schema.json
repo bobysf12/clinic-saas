@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "icd_10s",
+  "info": {
+    "singularName": "icd-10",
+    "pluralName": "icd-10s",
+    "displayName": "ICD10",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "code": {
+      "type": "string"
+    }
+  }
+}

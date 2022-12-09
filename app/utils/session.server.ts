@@ -5,6 +5,7 @@ import { authApi, LoginResponse } from "./strapiApi.server";
 enum SessionKeys {
   TOKEN = "token",
   USER_ID = "user_id",
+  ORG_ID = "org_id",
 }
 
 const sessionSecret = process.env.SESSION_SECRET;
@@ -28,9 +29,14 @@ const storage = createCookieSessionStorage({
 });
 
 export async function createUserSession({ user, jwt }: LoginResponse, redirectTo: string) {
+  const userData = await authApi.getOwnData(jwt);
   const session = await storage.getSession();
   session.set(SessionKeys.TOKEN, jwt);
   session.set(SessionKeys.USER_ID, user.id);
+  if (userData.organization) {
+    session.set(SessionKeys.ORG_ID, userData.organization.id);
+  }
+
   return redirect(redirectTo, {
     headers: {
       "Set-Cookie": await storage.commitSession(session),
@@ -47,6 +53,13 @@ export async function getToken(request: Request) {
   const token: string | undefined = session.get(SessionKeys.TOKEN);
 
   return token;
+}
+
+export async function getOrgId(request: Request) {
+  const session = await getSession(request);
+  const orgId: number = session.get(SessionKeys.ORG_ID);
+
+  return orgId ? Number(orgId) : undefined;
 }
 
 export async function logout(request: Request) {

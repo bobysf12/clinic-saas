@@ -4,7 +4,7 @@
   "info": {
     "singularName": "patient-record",
     "pluralName": "patient-records",
-    "displayName": "PatientRecord",
+    "displayName": "Patient Record",
     "description": ""
   },
   "options": {
@@ -55,6 +55,38 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::patient-record-medical-treatment.patient-record-medical-treatment"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::organization.organization",
+      "private": true
+    },
+    "blood_pressure": {
+      "type": "string"
+    },
+    "pulse": {
+      "type": "integer"
+    },
+    "temperature": {
+      "type": "decimal"
+    },
+    "respiratory_rate": {
+      "type": "integer"
+    },
+    "saturation": {
+      "type": "integer"
+    },
+    "height": {
+      "type": "decimal"
+    },
+    "weight": {
+      "type": "decimal"
+    },
+    "icd_10s": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::icd-10.icd-10"
     }
   }
 }

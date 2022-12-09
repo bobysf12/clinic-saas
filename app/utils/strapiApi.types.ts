@@ -32,6 +32,8 @@ export enum StrapiFilterOperators {
   $or = "$or",
   $eq = "$eq",
   $contains = "$contains",
+  $and = "$and",
+  $not = "$not",
 }
 
 export interface StrapiRequestOption {
@@ -47,13 +49,30 @@ export interface StrapiRequestOption {
     page?: number;
     pageSize?: number;
   };
+  sort?: string[];
 }
 
 export interface StrapiEntry<Attributes, Meta = any> {
   id: number;
-  attributes: Attributes;
+  attributes: Attributes & { createdAt: string; updatedAt: string; publishedAt: string };
   meta: Meta;
 }
+
+export interface PopulateData<T> {
+  data: T;
+}
+
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+  username: string;
+  organization?: {
+    id: number;
+    name: string;
+    description: string;
+  };
+};
 
 export enum Gender {
   Male = "male",
@@ -68,6 +87,9 @@ export type Patient = StrapiEntry<{
   phone: string;
   gender: Gender;
 }>;
+export type Doctor = StrapiEntry<{
+  name: string;
+}>;
 
 export type InventoryType = StrapiEntry<{
   name: string;
@@ -81,4 +103,17 @@ export type Inventory = StrapiEntry<{
   qty_per_unit: number;
   inventory_type: InventoryType;
   price: number;
+}>;
+
+export enum OutPatientStatus {
+  IN_QUEUE = "in_queue",
+  IN_PROGRESS = "in_progress",
+  WAITING_FOR_PAYMENT = "waiting_for_payment",
+}
+
+export type OutPatient = StrapiEntry<{
+  patient: PopulateData<Patient>;
+  doctor: PopulateData<Doctor>;
+  appointment_date: string;
+  status: OutPatientStatus;
 }>;

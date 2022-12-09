@@ -47,6 +47,12 @@
     },
     "rm_id": {
       "type": "string"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::organization.organization",
+      "private": true
     }
   }
 }

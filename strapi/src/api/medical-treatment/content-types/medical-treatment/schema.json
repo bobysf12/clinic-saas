@@ -4,7 +4,8 @@
   "info": {
     "singularName": "medical-treatment",
     "pluralName": "medical-treatments",
-    "displayName": "Medical Treatment"
+    "displayName": "Medical Treatment",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -19,6 +20,11 @@
     },
     "price": {
       "type": "decimal"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::organization.organization"
     }
   }
 }

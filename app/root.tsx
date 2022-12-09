@@ -1,7 +1,11 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
+import { setDefaultOptions } from "date-fns";
+import id from "date-fns/locale/id";
 import styles from "./styles/app.css";
 import globalStyles from "./styles/global.css";
+
+setDefaultOptions({ locale: id });
 
 export function links() {
   return [{ rel: "stylesheet", href: styles }, { rel: "stylesheet", href: globalStyles }, { rel: "" }];

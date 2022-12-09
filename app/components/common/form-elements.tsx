@@ -7,7 +7,7 @@ export const Label = ({ className, ...props }: JSX.IntrinsicElements["label"]) =
 
 type InputProps = ({ type: "textarea" } & JSX.IntrinsicElements["textarea"]) | JSX.IntrinsicElements["input"];
 const inputCss =
-  "placeholder-gray-500 focus-ring p-3 w-full text-black disabled:text-gray-400 text-lg font-medium bg-gray-100 rounded-lg";
+  "placeholder-gray-500 focus-ring p-3 w-full text-black disabled:text-gray-400 text-lg font-medium bg-gray-100 rounded-lg transition-all delay-200";
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(function Input(props, ref) {
   const className = clsx(inputCss, props.className);
 

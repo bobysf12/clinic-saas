@@ -1,5 +1,14 @@
 import qs from "qs";
-import type { Inventory, Patient, StrapiRequestOption, StrapiResponse } from "./strapiApi.types";
+import type {
+  Doctor,
+  Inventory,
+  OutPatient,
+  OutPatientStatus,
+  Patient,
+  StrapiRequestOption,
+  StrapiResponse,
+  User,
+} from "./strapiApi.types";
 import { StrapiRequestError } from "./strapiApi.types";
 
 let baseUrl = process.env.STRAPI_BASE_URL;
@@ -78,6 +87,7 @@ const generateStrapiQueryString = (option?: StrapiRequestOption) => {
       pagination: option.pagination,
       filters: option.filters,
       populate: option.populate,
+      sort: option.sort,
     },
     {
       encodeValuesOnly: true, // prettify URL
@@ -85,13 +95,6 @@ const generateStrapiQueryString = (option?: StrapiRequestOption) => {
   );
 
   return query;
-};
-
-export type User = {
-  id: number;
-  name: string;
-  email: string;
-  username: string;
 };
 
 export type LoginResponse = {
@@ -110,6 +113,9 @@ export const authApi = {
   },
 };
 export const patientApi = {
+  async getPatient(token: string, id: number, option?: StrapiRequestOption): Promise<StrapiResponse<Patient>> {
+    return httpGet(token, `/api/patients/${id}?` + generateStrapiQueryString(option));
+  },
   async getPatients(token: string, option?: StrapiRequestOption): Promise<StrapiResponse<Patient[]>> {
     return httpGet(token, "/api/patients?" + generateStrapiQueryString(option));
   },
@@ -134,5 +140,35 @@ export const patientApi = {
 export const inventoryApi = {
   async getInventories(token: string, option?: StrapiRequestOption): Promise<StrapiResponse<Inventory[]>> {
     return httpGet(token, "/api/inventories?" + generateStrapiQueryString(option));
+  },
+};
+
+export const outpatientApi = {
+  async getOutpatients(token: string, option?: StrapiRequestOption): Promise<StrapiResponse<OutPatient[]>> {
+    return httpGet(token, "/api/outpatients?" + generateStrapiQueryString(option));
+  },
+  async getOutpatient(token: string, id: number, option?: StrapiRequestOption): Promise<StrapiResponse<OutPatient>> {
+    return httpGet(token, `/api/outpatients/${id}?` + generateStrapiQueryString(option));
+  },
+  async createOutpatient(
+    token: string,
+    outpatient: {
+      doctor: number;
+      patient: number;
+      organization: number;
+      status: OutPatientStatus;
+      appointment_date: string; // ISO String
+    }
+  ): Promise<StrapiResponse<OutPatient>> {
+    return httpPost(token, "/api/outpatients", { data: outpatient });
+  },
+  async deleteOutpatientQueue(token: string, id: string): Promise<StrapiResponse<OutPatient>> {
+    return httpDelete(token, `/api/outpatients/${id}`);
+  },
+};
+
+export const doctorApi = {
+  async getDoctors(token: string, option?: StrapiRequestOption): Promise<StrapiResponse<Doctor[]>> {
+    return httpGet(token, "/api/doctors?" + generateStrapiQueryString(option));
   },
 };

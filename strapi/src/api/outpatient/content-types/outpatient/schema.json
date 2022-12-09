@@ -24,7 +24,8 @@
         "in_progress",
         "waiting_for_payment",
         "waiting_for_medicine",
-        "done"
+        "done",
+        "canceled_by_admin"
       ],
       "default": "in_queue"
     },
@@ -35,6 +36,16 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::patient-record.patient-record"
+    },
+    "doctor": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::doctor.doctor"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::organization.organization"
     }
   }
 }

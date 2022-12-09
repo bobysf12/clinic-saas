@@ -1,5 +1,5 @@
 import { ActionFunction, json, LoaderFunction } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData, useSearchParams } from "@remix-run/react";
+import { Form, Link, useFetcher, useLoaderData, useSearchParams } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { z, ZodError } from "zod";
 import { Button } from "~/components/button";
@@ -17,7 +17,7 @@ import {
   TableHeadRow,
 } from "~/components/common/table";
 import { H4 } from "~/components/common/typography";
-import { getToken } from "~/utils/session.server";
+import { getOrgId, getToken } from "~/utils/session.server";
 import { patientApi } from "~/utils/strapiApi.server";
 import { Gender, Patient, StrapiFilterOperators, StrapiRequestError, StrapiResponse } from "~/utils/strapiApi.types";
 
@@ -33,6 +33,7 @@ type LoaderData = {
 
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getToken(request);
+  const orgId = await getOrgId(request);
 
   const url = new URL(request.url);
   const page = url.searchParams.get("page") || 1;
@@ -41,6 +42,11 @@ export const loader: LoaderFunction = async ({ request }) => {
   const result = await patientApi.getPatients(session!, {
     pagination: { pageSize: 10, page: Number(page) },
     filters: {
+      organization: {
+        id: {
+          [StrapiFilterOperators.$eq]: orgId,
+        },
+      },
       name: {
         [StrapiFilterOperators.$contains]: search,
       },
@@ -81,7 +87,6 @@ export const action: ActionFunction = async ({ request }) => {
   try {
     const token = await getToken(request);
     if (_action === "delete") {
-      await new Promise((res) => setTimeout(res, 1000));
       const result = await patientApi.deletePatient(token!, Number(formData.id));
 
       if (result?.data.id) {
@@ -119,6 +124,7 @@ export default function Patients() {
 
   const [_, setSearchParams] = useSearchParams();
 
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [editedPatient, setEditedPatient] = useState<Patient>();
 
@@ -153,7 +159,14 @@ export default function Patients() {
         <div className="flex flex-row justify-between items-center mt-4">
           <Form>
             <div className="flex flex-row items-center space-x-2">
-              <InputField label="" name="query" placeholder="Cari Pasien" />
+              <InputField
+                ref={searchInputRef}
+                label=""
+                name="query"
+                placeholder="Cari Pasien"
+                className="w-96"
+                autoFocus
+              />
               <Button color="secondary" iconLeft={<i className="fa-solid fa-search" />}>
                 Cari pasien
               </Button>
@@ -173,7 +186,6 @@ export default function Patients() {
                 <TableHeadRow>
                   <TableCol>Id</TableCol>
                   <TableCol>Nama</TableCol>
-                  <TableCol>Jenis kelamin</TableCol>
                   <TableCol>Tgl Lahir</TableCol>
                   <TableCol>Alamat</TableCol>
                   <TableCol>No. Telp</TableCol>
@@ -210,17 +222,24 @@ type PatientRowProps = {
   editPatient: (patient: Patient) => void;
 };
 
+const namePrefixbyGender = {
+  [Gender.Male]: "Tn.",
+  [Gender.Female]: "Ny.",
+  [Gender.Others]: "",
+};
 const PatientRow = ({ patient, editPatient }: PatientRowProps) => {
   const fetcher = useFetcher();
   const isDeleting =
     fetcher.state === "submitting" &&
     fetcher.submission?.formData.get("id") === patient.id.toString() &&
     fetcher.submission?.formData.get("_action") === "delete";
+
   return (
     <TableBodyRow key={patient.id}>
       <TableCol className="whitespace-nowrap">{patient.id}</TableCol>
-      <TableCol className="whitespace-nowrap">{patient.attributes.name}</TableCol>
-      <TableCol className="whitespace-nowrap">{patient.attributes.gender}</TableCol>
+      <TableCol className="whitespace-nowrap">
+        {namePrefixbyGender[patient.attributes.gender]} {patient.attributes.name}
+      </TableCol>
       <TableCol className="whitespace-nowrap">{patient.attributes.dob}</TableCol>
       <TableCol className="">{patient.attributes.address}</TableCol>
       <TableCol className="whitespace-nowrap">{patient.attributes.phone}</TableCol>
@@ -233,8 +252,9 @@ const PatientRow = ({ patient, editPatient }: PatientRowProps) => {
         >
           Ubah
         </Button>
+
         <fetcher.Form method="post">
-          <input type={"text"} hidden name="id" value={patient.id} />
+          <input type={"text"} hidden name="id" value={patient.id} readOnly />
           <Button
             iconLeft={<i className="fa-solid fa-trash" />}
             disabled={isDeleting}
@@ -247,6 +267,11 @@ const PatientRow = ({ patient, editPatient }: PatientRowProps) => {
             Hapus
           </Button>
         </fetcher.Form>
+        <Link to={`/app/outpatients/queue?patientId=${patient.id}`}>
+          <Button color="primary" iconLeft={<i className="fa-solid fa-plus"></i>}>
+            Antrian
+          </Button>
+        </Link>
       </TableCol>
     </TableBodyRow>
   );
@@ -280,12 +305,12 @@ const PatientFormDialog = ({ open, close, initialValues }: PatientFormDialogProp
 
   return (
     <Dialog open={open} onClose={close} title={title}>
-      <fetcher.Form ref={formRef} method="post" aria-disabled={isAdding}>
+      <fetcher.Form ref={formRef} method="post" action="/app/patients" aria-disabled={isAdding}>
         <DialogContent>
           {formAction !== "delete" && fetcher.data?.error?.message && (
             <div className="text-red">{fetcher.data.error.message}</div>
           )}
-          <input type="text" hidden name="id" value={initialValues?.id} />
+          <input type="text" hidden name="id" value={initialValues?.id} readOnly />
           <InputField label="Nama" name="name" required defaultValue={initialValues?.attributes.name} />
           <InputField label="Tgl lahir" name="dob" type="date" required defaultValue={initialValues?.attributes.dob} />
           <SelectField label="Jenis kelamin" name="gender">

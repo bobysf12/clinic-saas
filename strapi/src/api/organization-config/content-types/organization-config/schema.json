@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "organization_configs",
+  "info": {
+    "singularName": "organization-config",
+    "pluralName": "organization-configs",
+    "displayName": "Organization Config"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "key": {
+      "type": "string"
+    },
+    "value": {
+      "type": "text"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::organization.organization"
+    }
+  }
+}
