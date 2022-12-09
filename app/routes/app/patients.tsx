@@ -47,9 +47,18 @@ export const loader: LoaderFunction = async ({ request }) => {
           [StrapiFilterOperators.$eq]: orgId,
         },
       },
-      name: {
-        [StrapiFilterOperators.$contains]: search,
-      },
+      [StrapiFilterOperators.$or]: [
+        {
+          name: {
+            [StrapiFilterOperators.$contains]: search,
+          },
+        },
+        {
+          rm_id: {
+            [StrapiFilterOperators.$contains]: search,
+          },
+        },
+      ],
     },
   });
 
@@ -65,6 +74,7 @@ const patientSchema = z.object({
   address: z.string().optional(),
   gender: z.nativeEnum(Gender).optional(),
   phone: z.string().optional(),
+  rm_id: z.string().optional(),
 });
 
 type ActionData = {
@@ -78,6 +88,7 @@ type ActionData = {
 };
 
 export const action: ActionFunction = async ({ request }) => {
+  const orgId = await getOrgId(request);
   const { _action, ...formData } = Object.fromEntries(await request.formData());
 
   let actionData: ActionData = {
@@ -100,7 +111,7 @@ export const action: ActionFunction = async ({ request }) => {
       let result: StrapiResponse<Patient>;
 
       if (_action === "create") {
-        result = await patientApi.createPatient(token!, patient);
+        result = await patientApi.createPatient(token!, { ...patient, organization: orgId! });
       } else {
         result = await patientApi.updatePatient(token!, Number(formData.id), patient);
       }
@@ -184,7 +195,7 @@ export default function Patients() {
             <Table className="table-fixed min-w-full">
               <TableHead>
                 <TableHeadRow>
-                  <TableCol>Id</TableCol>
+                  <TableCol>No. RM</TableCol>
                   <TableCol>Nama</TableCol>
                   <TableCol>Tgl Lahir</TableCol>
                   <TableCol>Alamat</TableCol>
@@ -236,7 +247,7 @@ const PatientRow = ({ patient, editPatient }: PatientRowProps) => {
 
   return (
     <TableBodyRow key={patient.id}>
-      <TableCol className="whitespace-nowrap">{patient.id}</TableCol>
+      <TableCol className="whitespace-nowrap">{patient.attributes.rm_id}</TableCol>
       <TableCol className="whitespace-nowrap">
         {namePrefixbyGender[patient.attributes.gender]} {patient.attributes.name}
       </TableCol>
@@ -311,6 +322,8 @@ const PatientFormDialog = ({ open, close, initialValues }: PatientFormDialogProp
             <div className="text-red">{fetcher.data.error.message}</div>
           )}
           <input type="text" hidden name="id" value={initialValues?.id} readOnly />
+          <InputField label="No. Rekam Medis" name="rm_id" defaultValue={initialValues?.attributes.rm_id} />
+
           <InputField label="Nama" name="name" required defaultValue={initialValues?.attributes.name} />
           <InputField label="Tgl lahir" name="dob" type="date" required defaultValue={initialValues?.attributes.dob} />
           <SelectField label="Jenis kelamin" name="gender">

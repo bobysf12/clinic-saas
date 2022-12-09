@@ -81,6 +81,7 @@ export enum Gender {
 }
 
 export type Patient = StrapiEntry<{
+  rm_id: string;
   name: string;
   dob: string;
   address: string;

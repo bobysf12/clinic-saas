@@ -121,7 +121,7 @@ export const patientApi = {
   },
   async createPatient(
     token: string,
-    patient: Partial<Omit<Patient["attributes"], "id">>
+    patient: Partial<Omit<Patient["attributes"], "id">> & { organization: number }
   ): Promise<StrapiResponse<Patient>> {
     return httpPost(token, "/api/patients", { data: patient });
   },
