@@ -25,5 +25,5 @@ export const TableBodyRow = ({ className, ...props }: HTMLAttributes<HTMLTableRo
 };
 
 export const TableCol = ({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) => {
-  return <td className={clsx("px-6 py-3", className)} {...props} />;
+  return <td className={clsx("px-4 py-2", className)} {...props} />;
 };

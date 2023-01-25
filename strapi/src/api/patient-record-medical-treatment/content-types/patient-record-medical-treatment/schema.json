@@ -22,6 +22,30 @@
     },
     "qty": {
       "type": "integer"
+    },
+    "doctor": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::doctor.doctor"
+    },
+    "patient": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::patient.patient"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::organization.organization"
+    },
+    "description": {
+      "type": "text"
+    },
+    "patient_record": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::patient-record.patient-record",
+      "inversedBy": "patient_record_medical_treatments"
     }
   }
 }

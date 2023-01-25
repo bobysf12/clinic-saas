@@ -1,10 +1,8 @@
-import { ActionFunction, json, LoaderFunction } from "@remix-run/node";
-import { Form, Link, useActionData, useFetcher, useLoaderData, useSearchParams } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
+import { ActionFunction, json, LoaderFunction, redirect } from "@remix-run/node";
+import { Form, Link, useFetcher, useLoaderData, useSearchParams } from "@remix-run/react";
 import { z, ZodError } from "zod";
 import { Button } from "~/components/button";
 import { Card } from "~/components/common/card";
-import { Dialog, DialogActions, DialogContent } from "~/components/common/dialog";
 import { InputField } from "~/components/common/form-elements";
 import { PaginationCard } from "~/components/common/pagination-card";
 import {
@@ -17,11 +15,12 @@ import {
   TableHeadRow,
 } from "~/components/common/table";
 import { H4 } from "~/components/common/typography";
+import { getOutpatient } from "~/services/outpatient.service";
 import { formatDateTime } from "~/utils/date";
 import { OUTPATIENT_STATUS_TEXT_MAP } from "~/utils/outpatient.utils";
 import { getOrgId, getToken } from "~/utils/session.server";
-import { outpatientApi } from "~/utils/strapiApi.server";
-import { OutPatient, StrapiFilterOperators, StrapiRequestError, OutPatientStatus } from "~/utils/strapiApi.types";
+import { outpatientApi, patientRecordApi } from "~/utils/strapiApi.server";
+import { OutPatient, OutPatientStatus, StrapiFilterOperators, StrapiRequestError } from "~/utils/strapiApi.types";
 
 type ActionData = {
   error?: {
@@ -33,6 +32,14 @@ type ActionData = {
   fields?: any;
 };
 
+enum FormActionName {
+  CREATE = "create",
+  CONTINUE = "continue",
+  CANCEL = "cancel",
+  PAY = "pay",
+  DONE = "done",
+}
+
 const createOutpatientSchema = z.object({
   patient: z.number(),
   doctor: z.number(),
@@ -40,6 +47,7 @@ const createOutpatientSchema = z.object({
 });
 
 export const action: ActionFunction = async ({ request }) => {
+  const session = await getToken(request);
   const orgId = await getOrgId(request);
   const { _action, ...formData } = Object.fromEntries(await request.formData());
 
@@ -48,18 +56,68 @@ export const action: ActionFunction = async ({ request }) => {
   };
 
   try {
-    const token = await getToken(request);
-    if (_action === "create") {
-      const newOutpatient = createOutpatientSchema.parse(formData);
-      const result = await outpatientApi.createOutpatient(token!, {
-        ...newOutpatient,
-        organization: orgId!,
-        status: OutPatientStatus.IN_QUEUE,
-        appointment_date: newOutpatient.appointment_date.toISOString(),
-      });
+    switch (_action) {
+      case FormActionName.CANCEL: {
+        const outpatientId = Number(formData.id);
+        const existingOutpatientData = await getOutpatient(request, outpatientId);
+        const patientRecordId = existingOutpatientData.data.attributes.patient_record.data?.id;
+        await outpatientApi.updateOutpatient(session!, Number(outpatientId), {
+          patient_record: patientRecordId,
+          status: OutPatientStatus.CANCELED_BY_ADMIN,
+        });
+        break;
+      }
+      case FormActionName.CREATE: {
+        const newOutpatient = createOutpatientSchema.parse(formData);
+        const result = await outpatientApi.createOutpatient(session!, {
+          ...newOutpatient,
+          organization: orgId!,
+          status: OutPatientStatus.IN_QUEUE,
+          appointment_date: newOutpatient.appointment_date.toISOString(),
+        });
 
-      if (result.data.id) {
-        actionData.result = result.data;
+        if (result.data.id) {
+          actionData.result = result.data;
+        }
+        break;
+      }
+
+      case FormActionName.PAY:
+      case FormActionName.CONTINUE: {
+        const outpatientId = Number(formData.id);
+        const existingOutpatientData = await getOutpatient(request, outpatientId);
+        let patientRecordId = existingOutpatientData.data.attributes.patient_record.data?.id;
+        if (!patientRecordId) {
+          // Create new record
+          const result = await patientRecordApi.createPatientRecord(session!, {
+            patient: existingOutpatientData.data.attributes.patient.data.id,
+            doctor: existingOutpatientData.data.attributes.doctor.data.id,
+          });
+          patientRecordId = result.data.id;
+        }
+
+        await outpatientApi.updateOutpatient(session!, Number(outpatientId), {
+          patient_record: patientRecordId,
+          status:
+            _action === FormActionName.CONTINUE ? OutPatientStatus.IN_PROGRESS : OutPatientStatus.WAITING_FOR_PAYMENT,
+        });
+
+        if (_action === FormActionName.CONTINUE) {
+          return redirect(`/app/outpatients/${outpatientId}`);
+        }
+
+        break;
+      }
+
+      case FormActionName.DONE: {
+        const outpatientId = Number(formData.id);
+        const existingOutpatientData = await getOutpatient(request, outpatientId);
+        const patientRecordId = existingOutpatientData.data.attributes.patient_record.data?.id;
+        await outpatientApi.updateOutpatient(session!, Number(outpatientId), {
+          patient_record: patientRecordId,
+          status: OutPatientStatus.DONE,
+        });
+        break;
       }
     }
   } catch (err) {
@@ -206,14 +264,48 @@ export default function Index() {
                     </TableCol>
                     <TableCol>{OUTPATIENT_STATUS_TEXT_MAP[outpatient.attributes.status]}</TableCol>
                     <TableCol>
-                      {outpatient.attributes.status === OutPatientStatus.IN_QUEUE && (
-                        <fetcher.Form method="post" action="/app/outpatients/queue">
-                          <input type={"text"} hidden name="id" value={outpatient.id} readOnly />
-                          <Button color="error" type="submit" name="_action" value="delete">
-                            Batalkan
-                          </Button>
-                        </fetcher.Form>
-                      )}
+                      <fetcher.Form method="post">
+                        <input type={"text"} hidden name="id" value={outpatient.id} readOnly />
+                        {outpatient.attributes.status === OutPatientStatus.IN_QUEUE && (
+                          <div className="flex flex-row">
+                            <Button color="primary" name="_action" value={FormActionName.CONTINUE}>
+                              Lanjut
+                            </Button>
+                            <Button
+                              color="error"
+                              variant="text"
+                              type="submit"
+                              name="_action"
+                              value={FormActionName.CANCEL}
+                            >
+                              Batalkan
+                            </Button>
+                          </div>
+                        )}
+                        {outpatient.attributes.status === OutPatientStatus.IN_PROGRESS && (
+                          <div className="flex flex-row">
+                            <Link to={`${outpatient.id}`}>
+                              <Button color="secondary">SOAP</Button>
+                            </Link>
+                            <Button color="primary" name="_action" value={FormActionName.PAY}>
+                              Lanjut Bayar
+                            </Button>
+                          </div>
+                        )}
+                        {outpatient.attributes.status === OutPatientStatus.WAITING_FOR_PAYMENT && (
+                          <div className="flex flex-row">
+                            <Button color="secondary">Cetak invoice</Button>
+                            <Button color="primary" name="_action" value={FormActionName.DONE}>
+                              Selesai
+                            </Button>
+                          </div>
+                        )}
+                        {outpatient.attributes.status === OutPatientStatus.DONE && (
+                          <div className="flex flex-row">
+                            <Button color="secondary">Cetak invoice</Button>
+                          </div>
+                        )}
+                      </fetcher.Form>
                     </TableCol>
                   </TableBodyRow>
                 ))}

@@ -53,6 +53,9 @@
       "relation": "oneToOne",
       "target": "api::organization.organization",
       "private": true
+    },
+    "allergy": {
+      "type": "text"
     }
   }
 }

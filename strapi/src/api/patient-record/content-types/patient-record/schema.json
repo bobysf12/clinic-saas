@@ -51,11 +51,6 @@
       "relation": "oneToOne",
       "target": "api::doctor.doctor"
     },
-    "patient_record_medical_treatments": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::patient-record-medical-treatment.patient-record-medical-treatment"
-    },
     "organization": {
       "type": "relation",
       "relation": "oneToOne",
@@ -87,6 +82,18 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::icd-10.icd-10"
+    },
+    "evaluation": {
+      "type": "richtext"
+    },
+    "patient_record_medical_treatments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::patient-record-medical-treatment.patient-record-medical-treatment",
+      "mappedBy": "patient_record"
+    },
+    "medical_treatment_note": {
+      "type": "text"
     }
   }
 }

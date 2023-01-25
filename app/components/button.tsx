@@ -48,7 +48,7 @@ const Button: FC<ButtonProps & JSX.IntrinsicElements["button"]> = ({
       {...rest}
     >
       {iconLeft}
-      &nbsp; &nbsp;
+      {iconLeft && <>&nbsp; &nbsp;</>}
       {children}
       {iconRight}
     </button>

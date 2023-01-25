@@ -102,7 +102,7 @@ export type Inventory = StrapiEntry<{
   description: string;
   unit_in_stock: number;
   qty_per_unit: number;
-  inventory_type: InventoryType;
+  inventory_type: PopulateData<InventoryType>;
   price: number;
 }>;
 
@@ -110,6 +110,8 @@ export enum OutPatientStatus {
   IN_QUEUE = "in_queue",
   IN_PROGRESS = "in_progress",
   WAITING_FOR_PAYMENT = "waiting_for_payment",
+  DONE = "done",
+  CANCELED_BY_ADMIN = "canceled_by_admin",
 }
 
 export type OutPatient = StrapiEntry<{
@@ -117,4 +119,51 @@ export type OutPatient = StrapiEntry<{
   doctor: PopulateData<Doctor>;
   appointment_date: string;
   status: OutPatientStatus;
+  patient_record: PopulateData<PatientRecord>;
+}>;
+
+export type PatientRecordInventory = StrapiEntry<{
+  qty: number;
+  price: number;
+  description: string;
+  inventory: PopulateData<Inventory>;
+}>;
+
+export type PatientRecordMedicalTreatment = StrapiEntry<{
+  qty: number;
+  price: number;
+  description: string;
+  medical_treatment: PopulateData<MedicalTreatment>;
+}>;
+
+export type PatientRecord = StrapiEntry<{
+  patient: PopulateData<Patient>;
+  doctor: PopulateData<Doctor>;
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+  blood_pressure: string;
+  pulse: number;
+  temperature: number;
+  respiratory_rate: number;
+  saturation: number;
+  height: number;
+  weight: number;
+  patient_record_inventories: PopulateData<PatientRecordInventory[]>;
+  patient_record_medical_treatments: PopulateData<PatientRecordMedicalTreatment[]>;
+  medical_treatment_note: string;
+}>;
+
+export type PatientRecordPayload = Partial<
+  Omit<PatientRecord["attributes"], "patient" | "doctor"> & {
+    patient: number;
+    doctor: number;
+  }
+>;
+
+export type MedicalTreatment = StrapiEntry<{
+  name: string;
+  description: string;
+  price: number;
 }>;
