@@ -1,5 +1,5 @@
 import qs from "qs";
-import type {
+import {
   Doctor,
   Inventory,
   MedicalTreatment,
@@ -7,12 +7,14 @@ import type {
   OutPatientStatus,
   Patient,
   PatientRecord,
+  PatientRecordInventory,
   PatientRecordPayload,
+  StrapiFilterOperators,
+  StrapiRequestError,
   StrapiRequestOption,
   StrapiResponse,
   User,
 } from "./strapiApi.types";
-import { StrapiRequestError } from "./strapiApi.types";
 
 let baseUrl = process.env.STRAPI_BASE_URL;
 if (!baseUrl) {
@@ -107,6 +109,16 @@ export type LoginResponse = {
   user: User;
 };
 
+export const getOrganizationFilter = (orgId: number | undefined) => {
+  return {
+    organization: {
+      id: {
+        [StrapiFilterOperators.$eq]: orgId,
+      },
+    },
+  };
+};
+
 export const authApi = {
   async getOwnData(token: string) {
     return httpGet(token, "/api/users/me");
@@ -190,6 +202,22 @@ export const doctorApi = {
   },
 };
 
+export type AddPatientRecordDrugPayload = {
+  organization: number;
+  patient_record: number;
+  patient: number;
+  doctor: number;
+  inventory: number;
+  description: string;
+  price: number;
+  qty: number;
+};
+export type UpdatePatientRecordDrugPayload = {
+  description: string;
+  price: number;
+  qty: number;
+};
+
 export const patientRecordApi = {
   async getPatientRecords(token: string, option?: StrapiRequestOption): Promise<StrapiResponse<PatientRecord[]>> {
     return httpGet(token, `/api/patient-records?` + generateStrapiQueryString(option));
@@ -203,6 +231,51 @@ export const patientRecordApi = {
     data: PatientRecordPayload
   ): Promise<StrapiResponse<PatientRecord>> {
     return httpPut(token, "/api/patient-records/" + id, { data });
+  },
+  async addPatientRecordTreatment(
+    token: string,
+    data: {
+      organization: number;
+      patient_record: number;
+      patient: number;
+      doctor: number;
+      medical_treatment: number;
+      note: string;
+      price: number;
+      qty: number;
+    }
+  ) {
+    return httpPost(token, `/api/patient-record-medical-treatments/`, { data });
+  },
+  async updatePatientRecordTreatment(
+    token: string,
+    id: number,
+    data: {
+      description: string;
+      price: number;
+      qty: number;
+    }
+  ) {
+    return httpPut(token, `/api/patient-record-medical-treatments/${id}`, { data });
+  },
+  async deletePatientRecordTreatment(token: string, id: number) {
+    return httpDelete(token, `/api/patient-record-medical-treatments/${id}`);
+  },
+
+  async getPatientRecordDrug(
+    token: string,
+    patientRecordInventoryId: number
+  ): Promise<StrapiResponse<PatientRecordInventory>> {
+    return httpGet(token, `/api/patient-record-inventories/${patientRecordInventoryId}`);
+  },
+  async addPatientRecordDrug(token: string, data: AddPatientRecordDrugPayload) {
+    return httpPost(token, `/api/patient-record-inventories`, { data });
+  },
+  async updatePatientRecordDrug(token: string, patientRecordInventoryId: number, data: UpdatePatientRecordDrugPayload) {
+    return httpPut(token, `/api/patient-record-inventories/${patientRecordInventoryId}`, { data });
+  },
+  async deletePatientRecordDrug(token: string, patientRecordInventoryId: number) {
+    return httpDelete(token, `/api/patient-record-inventories/${patientRecordInventoryId}`);
   },
 };
 

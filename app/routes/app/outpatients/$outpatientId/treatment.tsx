@@ -28,9 +28,10 @@ type LoaderData = {
   outpatient: OutPatient;
 };
 export const loader: LoaderFunction = async ({ request, params }) => {
+  const token = await getToken(request);
   const { outpatientId } = params;
 
-  const outpatientData = await getOutpatient(request, Number(outpatientId));
+  const outpatientData = await getOutpatient(token!, Number(outpatientId));
   const treatments = await getTreatments(request);
 
   return {
@@ -57,7 +58,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   const { outpatientId } = params;
   const { _action, ...formData } = Object.fromEntries(await request.formData());
 
-  const existingOutpatientData = await getOutpatient(request, Number(outpatientId));
+  const existingOutpatientData = await getOutpatient(session!, Number(outpatientId));
 
   if (!existingOutpatientData) {
     throw new Response("Invalid data", {
@@ -113,7 +114,7 @@ export const action: ActionFunction = async ({ request, params }) => {
       break;
     }
     case TreatmentAction.UPDATE_TREATMENT_NOTE: {
-      await updatePatientRecord(request, existingOutpatientData.data.attributes.patient_record.data.id, {
+      await updatePatientRecord(session!, existingOutpatientData.data.attributes.patient_record.data.id, {
         medical_treatment_note: formData.note as string,
       });
       break;
@@ -297,7 +298,7 @@ const SearchTreatmentDialog = (props: { treatments: MedicalTreatment[]; open: bo
                   </TableCol>
                 </TableBodyRow>
               )}
-              {filterTreatments(searchInputText, treatments).map((treatment) => (
+              {searchResult.map((treatment) => (
                 <TableBodyRow key={treatment.id}>
                   <TableCol>{treatment.attributes.name}</TableCol>
                   <TableCol>{treatment.attributes.description || "-"}</TableCol>

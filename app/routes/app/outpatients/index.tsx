@@ -15,9 +15,8 @@ import {
   TableHeadRow,
 } from "~/components/common/table";
 import { H4 } from "~/components/common/typography";
-import { getOutpatient } from "~/services/outpatient.service";
+import { getOutpatient, OUTPATIENT_STATUS_TEXT_MAP } from "~/services/outpatient.service";
 import { formatDateTime } from "~/utils/date";
-import { OUTPATIENT_STATUS_TEXT_MAP } from "~/utils/outpatient.utils";
 import { getOrgId, getToken } from "~/utils/session.server";
 import { outpatientApi, patientRecordApi } from "~/utils/strapiApi.server";
 import { OutPatient, OutPatientStatus, StrapiFilterOperators, StrapiRequestError } from "~/utils/strapiApi.types";
@@ -59,7 +58,7 @@ export const action: ActionFunction = async ({ request }) => {
     switch (_action) {
       case FormActionName.CANCEL: {
         const outpatientId = Number(formData.id);
-        const existingOutpatientData = await getOutpatient(request, outpatientId);
+        const existingOutpatientData = await getOutpatient(session!, outpatientId);
         const patientRecordId = existingOutpatientData.data.attributes.patient_record.data?.id;
         await outpatientApi.updateOutpatient(session!, Number(outpatientId), {
           patient_record: patientRecordId,
@@ -85,7 +84,7 @@ export const action: ActionFunction = async ({ request }) => {
       case FormActionName.PAY:
       case FormActionName.CONTINUE: {
         const outpatientId = Number(formData.id);
-        const existingOutpatientData = await getOutpatient(request, outpatientId);
+        const existingOutpatientData = await getOutpatient(session!, outpatientId);
         let patientRecordId = existingOutpatientData.data.attributes.patient_record.data?.id;
         if (!patientRecordId) {
           // Create new record
@@ -111,7 +110,7 @@ export const action: ActionFunction = async ({ request }) => {
 
       case FormActionName.DONE: {
         const outpatientId = Number(formData.id);
-        const existingOutpatientData = await getOutpatient(request, outpatientId);
+        const existingOutpatientData = await getOutpatient(session!, outpatientId);
         const patientRecordId = existingOutpatientData.data.attributes.patient_record.data?.id;
         await outpatientApi.updateOutpatient(session!, Number(outpatientId), {
           patient_record: patientRecordId,

@@ -1,10 +1,8 @@
-import { getToken } from "~/utils/session.server";
 import { patientRecordApi } from "~/utils/strapiApi.server";
 import { PatientRecordPayload } from "~/utils/strapiApi.types";
 
-async function updatePatientRecord(request: Request, patientRecordId: number, data: PatientRecordPayload) {
-  const session = await getToken(request);
-  return patientRecordApi.updatePatientRecord(session!, patientRecordId, data);
+async function updatePatientRecord(token: string, patientRecordId: number, data: PatientRecordPayload) {
+  return patientRecordApi.updatePatientRecord(token, patientRecordId, data);
 }
 
 export { updatePatientRecord };

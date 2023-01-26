@@ -40,15 +40,20 @@
         "audios"
       ]
     },
-    "inventory_type": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::inventory-type.inventory-type"
-    },
     "organization": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::organization.organization"
+    },
+    "is_stock": {
+      "type": "boolean"
+    },
+    "inventory_type": {
+      "type": "enumeration",
+      "enum": [
+        "drugs",
+        "med_supplies"
+      ]
     }
   }
 }

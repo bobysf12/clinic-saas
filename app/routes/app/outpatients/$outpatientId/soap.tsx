@@ -42,7 +42,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
   const { _action, ...formData } = Object.fromEntries(await request.formData());
 
-  const existingOutpatientData = await getOutpatient(request, Number(outpatientId));
+  const existingOutpatientData = await getOutpatient(token!, Number(outpatientId));
 
   if (!existingOutpatientData) {
     throw new Response("Invalid data", {

@@ -92,17 +92,17 @@ export type Doctor = StrapiEntry<{
   name: string;
 }>;
 
-export type InventoryType = StrapiEntry<{
-  name: string;
-  description: string;
-}>;
+export enum InventoryType {
+  DRUGS = "drugs",
+  MED_SUPPLIES = "med_supplies",
+}
 
 export type Inventory = StrapiEntry<{
   name: string;
   description: string;
   unit_in_stock: number;
   qty_per_unit: number;
-  inventory_type: PopulateData<InventoryType>;
+  inventory_type: InventoryType;
   price: number;
 }>;
 
@@ -153,6 +153,7 @@ export type PatientRecord = StrapiEntry<{
   patient_record_inventories: PopulateData<PatientRecordInventory[]>;
   patient_record_medical_treatments: PopulateData<PatientRecordMedicalTreatment[]>;
   medical_treatment_note: string;
+  drug_recipe_note: string;
 }>;
 
 export type PatientRecordPayload = Partial<

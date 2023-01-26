@@ -94,6 +94,9 @@
     },
     "medical_treatment_note": {
       "type": "text"
+    },
+    "drug_recipe_note": {
+      "type": "text"
     }
   }
 }
