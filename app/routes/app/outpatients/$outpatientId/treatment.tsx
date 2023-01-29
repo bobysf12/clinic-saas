@@ -1,5 +1,5 @@
-import { ActionFunction, json, LoaderFunction } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { ActionFunction, json, LoaderFunction, redirect } from "@remix-run/node";
+import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Button } from "~/components/button";
@@ -40,11 +40,13 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   };
 };
 
-enum TreatmentAction {
+enum FormActions {
   ADD_TREATMENT = "ADD_TREATMENT",
   UPDATE_SELECTED_TREATMENT = "UPDATE_SELECTED_TREATMENT",
   DELETE_SELECTED_TREATMENT = "DELETE_SELECTED_TREATMENT",
   UPDATE_TREATMENT_NOTE = "UPDATE_TREATMENT_NOTE",
+  CONTINUE = "CONTINUE",
+  BACK = "BACK",
 }
 
 const updateTreatmentSchema = z.object({
@@ -70,18 +72,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     existingOutpatientData.data.attributes.patient_record.data.attributes.patient_record_medical_treatments.data;
 
   switch (_action) {
-    case TreatmentAction.ADD_TREATMENT: {
-      // const existingTreatment = patientRecordTreatments.find(
-      //   (treatment) => treatment.attributes.medical_treatment.data.id === Number(formData.id)
-      // );
-      // if (existingTreatment) {
-      //   // Simply add the qty
-      //   await treatmentsApi.updatePatientRecordTreatment(session!, existingTreatment.id, {
-      //     description: existingTreatment.attributes.description,
-      //     price: existingTreatment.attributes.medical_treatment.data.attributes.price,
-      //     qty: existingTreatment.attributes.qty + 1,
-      //   });
-      // } else {
+    case FormActions.ADD_TREATMENT: {
       // Create new entry
       await treatmentsApi.addPatientRecordTreatment(session!, {
         medical_treatment: Number(formData.id),
@@ -96,7 +87,7 @@ export const action: ActionFunction = async ({ request, params }) => {
       // }
       break;
     }
-    case TreatmentAction.UPDATE_SELECTED_TREATMENT: {
+    case FormActions.UPDATE_SELECTED_TREATMENT: {
       const data = updateTreatmentSchema.parse(formData);
       const existingTreatment = patientRecordTreatments.find((treatment) => treatment.id === Number(formData.id));
       if (!existingTreatment) {
@@ -109,15 +100,21 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
       break;
     }
-    case TreatmentAction.DELETE_SELECTED_TREATMENT: {
+    case FormActions.DELETE_SELECTED_TREATMENT: {
       await treatmentsApi.deletePatientRecordTreatment(session!, Number(formData.id));
       break;
     }
-    case TreatmentAction.UPDATE_TREATMENT_NOTE: {
+    case FormActions.UPDATE_TREATMENT_NOTE: {
       await updatePatientRecord(session!, existingOutpatientData.data.attributes.patient_record.data.id, {
         medical_treatment_note: formData.note as string,
       });
       break;
+    }
+    case FormActions.CONTINUE: {
+      return redirect("/app/outpatients/" + outpatientId + "/recipe");
+    }
+    case FormActions.BACK: {
+      return redirect("/app/outpatients/" + outpatientId + "/soap");
     }
   }
   return json({
@@ -179,6 +176,16 @@ export default function Treatment() {
           <NoteForm note={outpatient.attributes.patient_record.data.attributes.medical_treatment_note || ""} />
         </div>
       </TableContainer>
+      <Form method="post">
+        <div className="w-full justify-center mx-auto inline-flex mt-4">
+          <Button color="secondary" variant="outline" name="_action" value={FormActions.BACK}>
+            Sebelumnya
+          </Button>
+          <Button color="primary" name="_action" value={FormActions.CONTINUE}>
+            Selanjutnya
+          </Button>
+        </div>
+      </Form>
       <SearchTreatmentDialog open={isSearchDialogOpen} onClose={closeSearchDialog} treatments={treatments} />
     </>
   );
@@ -197,7 +204,7 @@ const TreatmentRow = (props: { patientRecordTreatment: PatientRecordMedicalTreat
       <TableCol>
         <fetcher.Form method="post" ref={qtyFormRef}>
           <input type="hidden" name="id" value={patientRecordInventory.id} />
-          <input type="hidden" name="_action" value={TreatmentAction.UPDATE_SELECTED_TREATMENT} />
+          <input type="hidden" name="_action" value={FormActions.UPDATE_SELECTED_TREATMENT} />
           <InputField
             name="qty"
             type="number"
@@ -210,7 +217,7 @@ const TreatmentRow = (props: { patientRecordTreatment: PatientRecordMedicalTreat
       <TableCol>
         <fetcher.Form method="post" ref={descriptionFormRef}>
           <input type="hidden" name="id" value={patientRecordInventory.id} />
-          <input type="hidden" name="_action" value={TreatmentAction.UPDATE_SELECTED_TREATMENT} />
+          <input type="hidden" name="_action" value={FormActions.UPDATE_SELECTED_TREATMENT} />
           <InputField
             name="description"
             defaultValue={patientRecordInventory.attributes.description}
@@ -221,7 +228,7 @@ const TreatmentRow = (props: { patientRecordTreatment: PatientRecordMedicalTreat
       <TableCol>
         <fetcher.Form method="post">
           <input type="hidden" name="id" value={patientRecordInventory.id} />
-          <Button color="error" type="submit" value={TreatmentAction.DELETE_SELECTED_TREATMENT} name="_action">
+          <Button color="error" type="submit" value={FormActions.DELETE_SELECTED_TREATMENT} name="_action">
             Hapus
           </Button>
         </fetcher.Form>
@@ -235,7 +242,7 @@ const NoteForm = (props: { note: string }) => {
   const noteFormRef = useRef<HTMLFormElement>(null);
   return (
     <fetcher.Form method="post" ref={noteFormRef}>
-      <input type="hidden" name="_action" value={TreatmentAction.UPDATE_TREATMENT_NOTE} />
+      <input type="hidden" name="_action" value={FormActions.UPDATE_TREATMENT_NOTE} />
       <InputField
         type="textarea"
         name="note"
@@ -311,7 +318,7 @@ const SearchTreatmentDialog = (props: { treatments: MedicalTreatment[]; open: bo
                         variant="text"
                         type="submit"
                         name="_action"
-                        value={TreatmentAction.ADD_TREATMENT}
+                        value={FormActions.ADD_TREATMENT}
                         onClick={onClose}
                       >
                         Pilih

@@ -1,5 +1,5 @@
-import { ActionFunction, json, LoaderFunction } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { ActionFunction, json, LoaderFunction, redirect } from "@remix-run/node";
+import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Button } from "~/components/button";
@@ -44,11 +44,13 @@ export const loader: LoaderFunction = async ({ request, params }): Promise<Loade
   };
 };
 
-enum FormAction {
+enum FormActions {
   ADD_DRUG = "ADD_DRUG",
   UPDATE_SELECTED_DRUG = "UPDATE_SELECTED_DRUG",
   DELETE_SELECTED_DRUG = "DELETE_SELECTED_DRUG",
   UPDATE_NOTE = "UPDATE_NOTE",
+  DONE = "DONE",
+  BACK = "BACK",
 }
 
 const createDrugSchema = z.object({
@@ -70,7 +72,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   const { outpatientId } = params;
   const { _action, ...formData } = Object.fromEntries(await request.formData());
   switch (_action) {
-    case FormAction.ADD_DRUG: {
+    case FormActions.ADD_DRUG: {
       const data = createDrugSchema.parse(formData);
       const outpatientData = await outpatientService.getOutpatient(token!, Number(outpatientId));
       await outpatientService.addPatientRecordDrug(token!, {
@@ -85,7 +87,7 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
       break;
     }
-    case FormAction.UPDATE_SELECTED_DRUG: {
+    case FormActions.UPDATE_SELECTED_DRUG: {
       const data = updateDrugSchema.parse(formData);
       const existingPatientRecordInventory = await outpatientService.getPatientRecordDrug(token!, data.id);
       if (!existingPatientRecordInventory) break;
@@ -97,7 +99,7 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
       break;
     }
-    case FormAction.UPDATE_NOTE: {
+    case FormActions.UPDATE_NOTE: {
       const patientRecord = await outpatientService.getPatientRecordByOutpatientId(token!, Number(outpatientId));
       if (!patientRecord) {
         break;
@@ -106,6 +108,12 @@ export const action: ActionFunction = async ({ request, params }) => {
         drug_recipe_note: formData.note as string,
       });
       break;
+    }
+    case FormActions.DONE: {
+      return redirect("/app/outpatients/" + outpatientId + "/recipe");
+    }
+    case FormActions.BACK: {
+      return redirect("/app/outpatients/" + outpatientId + "/treatment");
     }
     default:
       break;
@@ -168,7 +176,7 @@ export default function Recipe() {
                             {
                               id: drug.id.toString(),
                               qty: evt.target.value,
-                              _action: FormAction.UPDATE_SELECTED_DRUG,
+                              _action: FormActions.UPDATE_SELECTED_DRUG,
                             },
                             { method: "post" }
                           )
@@ -185,7 +193,7 @@ export default function Recipe() {
                             {
                               id: drug.id.toString(),
                               description: evt.target.value,
-                              _action: FormAction.UPDATE_SELECTED_DRUG,
+                              _action: FormActions.UPDATE_SELECTED_DRUG,
                             },
                             { method: "post" }
                           )
@@ -199,7 +207,7 @@ export default function Recipe() {
                           fetcher.submit(
                             {
                               id: drug.id.toString(),
-                              _action: FormAction.DELETE_SELECTED_DRUG,
+                              _action: FormActions.DELETE_SELECTED_DRUG,
                             },
                             { method: "post" }
                           )
@@ -224,7 +232,7 @@ export default function Recipe() {
               fetcher.submit(
                 {
                   note: evt.target.value,
-                  _action: FormAction.UPDATE_NOTE,
+                  _action: FormActions.UPDATE_NOTE,
                 },
                 { method: "post" }
               )
@@ -232,6 +240,16 @@ export default function Recipe() {
           />
         </div>
       </TableContainer>
+      <Form method="post">
+        <div className="w-full justify-center mx-auto inline-flex mt-4">
+          <Button color="secondary" variant="outline" name="_action" value={FormActions.BACK}>
+            Sebelumnya
+          </Button>
+          <Button color="primary" name="_action" value={FormActions.DONE}>
+            Selesai
+          </Button>
+        </div>
+      </Form>
       <SearchTreatmentDialog open={isSearchDialogOpen} onClose={closeSearchDialog} drugs={drugs} />
     </>
   );
@@ -297,7 +315,13 @@ const SearchTreatmentDialog = (props: { drugs: Inventory[]; open: boolean; onClo
                     <fetcher.Form method="post">
                       <input type="hidden" name="id" value={drug.id} />
                       <input type="hidden" name="price" value={drug.attributes.price} />
-                      <Button variant="text" type="submit" name="_action" value={FormAction.ADD_DRUG} onClick={onClose}>
+                      <Button
+                        variant="text"
+                        type="submit"
+                        name="_action"
+                        value={FormActions.ADD_DRUG}
+                        onClick={onClose}
+                      >
                         Pilih
                       </Button>
                     </fetcher.Form>
