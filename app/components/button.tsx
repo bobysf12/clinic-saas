@@ -28,12 +28,14 @@ interface ButtonProps {
   variant?: keyof typeof variantMap;
   iconLeft?: JSX.Element;
   iconRight?: JSX.Element;
+  fullWidth?: boolean;
 }
 const Button: FC<ButtonProps & JSX.IntrinsicElements["button"]> = ({
   className,
   children,
   iconLeft,
   iconRight,
+  fullWidth,
   variant = "raised",
   color = "primary",
   ...rest
@@ -43,12 +45,13 @@ const Button: FC<ButtonProps & JSX.IntrinsicElements["button"]> = ({
       className={clsx(
         "flex items-center text-sm font-semibold px-4 py-3 rounded-xl outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150",
         variantMap[variant][color],
+        { "w-full": fullWidth },
         className
       )}
       {...rest}
     >
       {iconLeft}
-      {iconLeft && <>&nbsp; &nbsp;</>}
+      {iconLeft && children ? <>&nbsp; &nbsp;</> : null}
       {children}
       {iconRight}
     </button>

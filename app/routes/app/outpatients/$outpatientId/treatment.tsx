@@ -3,6 +3,7 @@ import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Button } from "~/components/button";
+import { Card } from "~/components/common/card";
 import { Dialog, DialogContent } from "~/components/common/dialog";
 import { InputField } from "~/components/common/form-elements";
 import {
@@ -137,21 +138,29 @@ export default function Treatment() {
 
   return (
     <>
+      <Card className="mt-4">
+        <H5>Tindakan</H5>
+        {/* <div className="px-4"> */}
+        <InputField placeholder="Cari tindakan" type="text" name="search" onClick={openSearchDialog} />
+        {/* </div> */}
+      </Card>
       <TableContainer className="mt-4">
-        <H5 className="p-4">Tindakan</H5>
-        <div className="px-4 grid grid-cols-[minmax(0,_1fr)_200px_200px] gap-2 items-center  border-b border-solid border-gray-200">
-          <InputField placeholder="Cari tindakan" type="text" name="search" onClick={openSearchDialog} />
-        </div>
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden">
             <Table className="table-fixed min-w-full">
               <TableHead>
                 <TableHeadRow>
-                  <TableCol>Nama</TableCol>
-                  <TableCol>Qty</TableCol>
-                  <TableCol>Total</TableCol>
-                  <TableCol>Catatan</TableCol>
-                  <TableCol>&nbsp;</TableCol>
+                  <TableCol width="30%" style={{ minWidth: 240 }}>
+                    Nama
+                  </TableCol>
+                  <TableCol width="10%" style={{ minWidth: 120 }}>
+                    Qty
+                  </TableCol>
+                  <TableCol width="15%" style={{ minWidth: 120 }}>
+                    Total
+                  </TableCol>
+                  <TableCol style={{ minWidth: 240 }}>Catatan Tindakan</TableCol>
+                  <TableCol width="10%">&nbsp;</TableCol>
                 </TableHeadRow>
               </TableHead>
               <TableBody>
@@ -172,10 +181,11 @@ export default function Treatment() {
             </Table>
           </div>
         </div>
-        <div className="p-4">
-          <NoteForm note={outpatient.attributes.patient_record.data.attributes.medical_treatment_note || ""} />
-        </div>
       </TableContainer>
+
+      <Card className="mt-4">
+        <NoteForm note={outpatient.attributes.patient_record.data.attributes.medical_treatment_note || ""} />
+      </Card>
       <Form method="post">
         <div className="w-full justify-center mx-auto inline-flex mt-4">
           <Button color="secondary" variant="outline" name="_action" value={FormActions.BACK}>
@@ -199,7 +209,9 @@ const TreatmentRow = (props: { patientRecordTreatment: PatientRecordMedicalTreat
 
   return (
     <TableBodyRow key={patientRecordInventory.id}>
-      <TableCol>{patientRecordInventory.attributes.medical_treatment.data.attributes.name}</TableCol>
+      <TableCol className="font-semibold">
+        {patientRecordInventory.attributes.medical_treatment.data.attributes.name}
+      </TableCol>
 
       <TableCol>
         <fetcher.Form method="post" ref={qtyFormRef}>
@@ -213,7 +225,9 @@ const TreatmentRow = (props: { patientRecordTreatment: PatientRecordMedicalTreat
           />
         </fetcher.Form>
       </TableCol>
-      <TableCol>{formatIDR(patientRecordInventory.attributes.qty * patientRecordInventory.attributes.price)}</TableCol>
+      <TableCol className="text-right">
+        {formatIDR(patientRecordInventory.attributes.qty * patientRecordInventory.attributes.price)}
+      </TableCol>
       <TableCol>
         <fetcher.Form method="post" ref={descriptionFormRef}>
           <input type="hidden" name="id" value={patientRecordInventory.id} />
@@ -228,9 +242,13 @@ const TreatmentRow = (props: { patientRecordTreatment: PatientRecordMedicalTreat
       <TableCol>
         <fetcher.Form method="post">
           <input type="hidden" name="id" value={patientRecordInventory.id} />
-          <Button color="error" type="submit" value={FormActions.DELETE_SELECTED_TREATMENT} name="_action">
-            Hapus
-          </Button>
+          <Button
+            color="error"
+            type="submit"
+            value={FormActions.DELETE_SELECTED_TREATMENT}
+            name="_action"
+            iconLeft={<i className="fa-solid fa-trash" />}
+          ></Button>
         </fetcher.Form>
       </TableCol>
     </TableBodyRow>
@@ -267,7 +285,7 @@ const SearchTreatmentDialog = (props: { treatments: MedicalTreatment[]; open: bo
   }, [open]);
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={onClose} title="Pilih Tindakan" maxWidth="lg" fullWidth>
       <DialogContent>
         <InputField
           ref={searchInputRef}

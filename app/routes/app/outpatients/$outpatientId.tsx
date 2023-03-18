@@ -1,6 +1,7 @@
 import { LoaderFunction } from "@remix-run/node";
 import { NavLink, useLoaderData } from "@remix-run/react";
 import { Outlet } from "react-router-dom";
+import { Button } from "~/components/button";
 import { Card } from "~/components/common/card";
 import { H4 } from "~/components/common/typography";
 import { getOutpatient } from "~/services/outpatient.service";
@@ -40,7 +41,7 @@ export default function SOAP() {
             <H4>Rawat Jalan</H4>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
           <div className="flex flex-col">
             <span className="text-sm">Dokter</span>
             <b className="text-lg">{outpatient.attributes.doctor.data.attributes.name || "-"}</b>
@@ -66,18 +67,38 @@ export default function SOAP() {
             <b className="text-lg">{outpatient.attributes.patient.data.attributes.address || "-"}</b>
           </div>
         </div>
-        <div className="mt-4 border-t pt-4 flex flex-row">
-          <NavLink to="ttv" className="mr-4 px-2">
-            TTV
+        <div className="mt-4 border-t pt-4 flex flex-row overflow-x-auto">
+          <NavLink to="ttv" className="mr-2">
+            {({ isActive }) => (
+              <Button variant={isActive ? "raised" : "text"} color={isActive ? "primary" : "secondary"}>
+                TTV
+              </Button>
+            )}
           </NavLink>
-          <NavLink to="soap" className="mr-4 px-2">
-            SOAP
+          <NavLink to="soap" className="mr-2">
+            {({ isActive }) => (
+              <Button variant={isActive ? "raised" : "text"} color={isActive ? "primary" : "secondary"}>
+                SOAP
+              </Button>
+            )}
           </NavLink>
-          <NavLink to="treatment" className="mr-4 px-2">
-            Tindakan
+          <NavLink to="treatment" className="mr-2">
+            {({ isActive }) => (
+              <Button variant={isActive ? "raised" : "text"} color={isActive ? "primary" : "secondary"}>
+                Tindakan
+              </Button>
+            )}
           </NavLink>
-          <NavLink to="recipe" className="mr-4 px-2">
-            Resep Obat
+          <NavLink to="recipe" className="mr-2">
+            {({ isActive }) => (
+              <Button
+                className="whitespace-nowrap"
+                variant={isActive ? "raised" : "text"}
+                color={isActive ? "primary" : "secondary"}
+              >
+                Resep Obat
+              </Button>
+            )}
           </NavLink>
         </div>
       </Card>

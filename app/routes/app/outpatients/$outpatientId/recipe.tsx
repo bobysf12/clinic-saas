@@ -3,6 +3,7 @@ import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Button } from "~/components/button";
+import { Card } from "~/components/common/card";
 import { Dialog, DialogContent } from "~/components/common/dialog";
 import { InputField } from "~/components/common/form-elements";
 import {
@@ -109,6 +110,10 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
       break;
     }
+    case FormActions.DELETE_SELECTED_DRUG: {
+      await outpatientService.deletePatientRecordDrug(token!, Number(formData.id));
+      break;
+    }
     case FormActions.DONE: {
       return redirect("/app/outpatients/" + outpatientId + "/recipe");
     }
@@ -135,11 +140,12 @@ export default function Recipe() {
 
   return (
     <>
+      <Card className="mt-4">
+        <H5>Resep Obat</H5>
+
+        <InputField placeholder="Cari obat" type="text" name="search" onClick={openSearchDialog} />
+      </Card>
       <TableContainer className="mt-4">
-        <H5 className="p-4">Resep Obat</H5>
-        <div className="px-4 grid grid-cols-[minmax(0,_1fr)_200px_200px] gap-2 items-center  border-b border-solid border-gray-200">
-          <InputField placeholder="Cari obat" type="text" name="search" onClick={openSearchDialog} />
-        </div>
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden">
             <Table className="table-fixed min-w-full">
@@ -222,24 +228,24 @@ export default function Recipe() {
             </Table>
           </div>
         </div>
-        <div className="p-4">
-          <InputField
-            type="textarea"
-            name="note"
-            label="Catatan"
-            defaultValue={patientRecordDrugNote}
-            onBlur={(evt: any) =>
-              fetcher.submit(
-                {
-                  note: evt.target.value,
-                  _action: FormActions.UPDATE_NOTE,
-                },
-                { method: "post" }
-              )
-            }
-          />
-        </div>
       </TableContainer>
+      <Card className="mt-4">
+        <InputField
+          type="textarea"
+          name="note"
+          label="Catatan"
+          defaultValue={patientRecordDrugNote}
+          onBlur={(evt: any) =>
+            fetcher.submit(
+              {
+                note: evt.target.value,
+                _action: FormActions.UPDATE_NOTE,
+              },
+              { method: "post" }
+            )
+          }
+        />
+      </Card>
       <Form method="post">
         <div className="w-full justify-center mx-auto inline-flex mt-4">
           <Button color="secondary" variant="outline" name="_action" value={FormActions.BACK}>

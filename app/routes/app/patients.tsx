@@ -167,25 +167,25 @@ export default function Patients() {
       <Card>
         <H4>All Patients</H4>
 
-        <div className="flex flex-row justify-between items-center mt-4">
-          <Form>
-            <div className="flex flex-row items-center space-x-2">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mt-4">
+          <div className="w-full sm:max-w-sm">
+            <Form method="get">
               <InputField
+                className="w-full"
                 ref={searchInputRef}
                 label=""
                 name="query"
                 placeholder="Cari Pasien"
-                className="w-96"
                 autoFocus
               />
-              <Button color="secondary" iconLeft={<i className="fa-solid fa-search" />}>
-                Cari pasien
-              </Button>
-            </div>
-          </Form>
-          <Button iconLeft={<i className="fa-solid fa-plus" />} onClick={() => setOpen(true)}>
-            Tambah Pasien
-          </Button>
+              <input type="submit" hidden />
+            </Form>
+          </div>
+          <div>
+            <Button iconLeft={<i className="fa-solid fa-plus" />} onClick={() => setOpen(true)}>
+              Tambah Pasien
+            </Button>
+          </div>
         </div>
       </Card>
 
@@ -261,10 +261,10 @@ const PatientRow = ({ patient, editPatient }: PatientRowProps) => {
           color="secondary"
           onClick={() => editPatient(patient)}
         >
-          Ubah
+          {/* Ubah */}
         </Button>
 
-        <fetcher.Form method="post">
+        {/* <fetcher.Form method="post">
           <input type={"text"} hidden name="id" value={patient.id} readOnly />
           <Button
             iconLeft={<i className="fa-solid fa-trash" />}
@@ -274,13 +274,11 @@ const PatientRow = ({ patient, editPatient }: PatientRowProps) => {
             value="delete"
             variant="raised"
             color="error"
-          >
-            Hapus
-          </Button>
-        </fetcher.Form>
+          ></Button>
+        </fetcher.Form> */}
         <Link to={`/app/outpatients/queue?patientId=${patient.id}`}>
           <Button color="primary" iconLeft={<i className="fa-solid fa-plus"></i>}>
-            Antrian
+            {/* Antrian */}
           </Button>
         </Link>
       </TableCol>
@@ -303,7 +301,7 @@ const PatientFormDialog = ({ open, close, initialValues }: PatientFormDialogProp
 
   useEffect(() => {
     if (!open) {
-      formRef.current.reset();
+      formRef.current?.reset();
     }
   }, [open]);
 
@@ -315,7 +313,7 @@ const PatientFormDialog = ({ open, close, initialValues }: PatientFormDialogProp
   }, [fetcher]);
 
   return (
-    <Dialog open={open} onClose={close} title={title}>
+    <Dialog open={open} onClose={close} title={title} fullWidth maxWidth="md">
       <fetcher.Form ref={formRef} method="post" action="/app/patients" aria-disabled={isAdding}>
         <DialogContent>
           {formAction !== "delete" && fetcher.data?.error?.message && (

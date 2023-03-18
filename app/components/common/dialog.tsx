@@ -3,11 +3,11 @@ import type { FC, HTMLAttributes, ReactNode } from "react";
 import { H5 } from "./typography";
 
 const maxWidthSizes = {
-  xs: "w-3/12",
-  sm: "w-5/12",
-  md: "w-7/12",
-  lg: "w-9/12",
-  xl: "w-11/12",
+  xs: "max-w-xs",
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
 };
 
 type DialogProps = {
@@ -19,16 +19,26 @@ type DialogProps = {
   fullWidth?: boolean;
 };
 
-export const Dialog = ({ open, onClose, title, children, maxWidth = "sm" }: DialogProps) => {
+export const Dialog = ({ open, onClose, title, children, maxWidth = "sm", fullWidth }: DialogProps) => {
   return (
     <div
-      className={clsx("fixed inset-0 flex flex-col items-center justify-center w-full h-full", {
-        "translate-y-0": open,
-        "translate-y-full": !open,
-      })}
+      className={clsx(
+        "fixed inset-0 overflow-x-hidden overflow-y-auto bg-slate-500 bg-opacity-50 backdrop-blur-sm items-center justify-center flex",
+        {
+          "translate-y-0": open,
+          "translate-y-full": !open,
+        }
+      )}
+      style={{ zIndex: 1000 }}
+      onClick={onClose}
     >
-      <div className="fixed bg-slate-500 w-full h-full opacity-50" onClick={onClose} />
-      <div className={`bg-white rounded-lg z-10 ${maxWidthSizes[maxWidth]}`}>
+      <div
+        onClick={(e) => {
+          // do not close modal if anything inside modal content is clicked
+          e.stopPropagation();
+        }}
+        className={clsx(`m-auto bg-white rounded-lg ${maxWidthSizes[maxWidth]}`, { "w-full": fullWidth })}
+      >
         {title && <DialogHeader onClose={onClose}>{title}</DialogHeader>}
         {children}
       </div>

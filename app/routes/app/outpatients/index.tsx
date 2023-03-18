@@ -213,20 +213,21 @@ export default function Index() {
       <Card>
         <H4>Rawat Jalan</H4>
 
-        <div className="flex flex-row justify-between items-center mt-4">
-          <Form>
-            <div className="flex flex-row items-center space-x-2">
-              <InputField label="" name="query" placeholder="Cari" />
-              <Button color="secondary" iconLeft={<i className="fa-solid fa-search" />}>
-                Cari
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mt-4">
+          <div className="w-full sm:max-w-sm">
+            <Form>
+              <InputField label="" name="query" placeholder="Cari" autoFocus />
+
+              <input type="submit" hidden />
+            </Form>
+          </div>
+          <div>
+            <Link to={"/app/patients"}>
+              <Button iconLeft={<i className="fa-solid fa-plus" />} color="primary">
+                Tambah Antrian
               </Button>
-            </div>
-          </Form>
-          <Link to={"/app/patients"}>
-            <Button iconLeft={<i className="fa-solid fa-plus" />} color="primary">
-              Tambah Antrian
-            </Button>
-          </Link>
+            </Link>
+          </div>
         </div>
       </Card>
 
