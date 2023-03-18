@@ -254,7 +254,11 @@ export default function Index() {
                 )}
                 {outpatients.map((outpatient) => (
                   <TableBodyRow key={outpatient.id}>
-                    <TableCol className="font-medium">{outpatient.attributes.patient.data.attributes.name}</TableCol>
+                    <TableCol className="font-medium">
+                      <Link to={`/app/patients/${outpatient.attributes.patient.data.id}`}>
+                        {outpatient.attributes.patient.data.attributes.name}
+                      </Link>
+                    </TableCol>
                     <TableCol>{outpatient.attributes.doctor.data.attributes.name}</TableCol>
                     <TableCol>
                       {formatDateTime(

@@ -249,7 +249,9 @@ const PatientRow = ({ patient, editPatient }: PatientRowProps) => {
     <TableBodyRow key={patient.id}>
       <TableCol className="whitespace-nowrap">{patient.attributes.rm_id}</TableCol>
       <TableCol className="whitespace-nowrap">
-        {namePrefixbyGender[patient.attributes.gender]} {patient.attributes.name}
+        <Link to={`/app/patients/${patient.id}`}>
+          {namePrefixbyGender[patient.attributes.gender]} {patient.attributes.name}
+        </Link>
       </TableCol>
       <TableCol className="whitespace-nowrap">{patient.attributes.dob}</TableCol>
       <TableCol className="">{patient.attributes.address}</TableCol>
@@ -314,7 +316,7 @@ const PatientFormDialog = ({ open, close, initialValues }: PatientFormDialogProp
 
   return (
     <Dialog open={open} onClose={close} title={title} fullWidth maxWidth="md">
-      <fetcher.Form ref={formRef} method="post" action="/app/patients" aria-disabled={isAdding}>
+      <fetcher.Form ref={formRef} method="post" aria-disabled={isAdding}>
         <DialogContent>
           {formAction !== "delete" && fetcher.data?.error?.message && (
             <div className="text-red">{fetcher.data.error.message}</div>
