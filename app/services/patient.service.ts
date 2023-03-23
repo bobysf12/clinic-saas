@@ -8,6 +8,7 @@ export async function getPatientOutpatientRecords(token: string, patientId: numb
   return outpatientApi.getOutpatients(token, {
     populate: {
       doctor: "*",
+      polyclinic: "*",
     },
     filters: {
       patient: {

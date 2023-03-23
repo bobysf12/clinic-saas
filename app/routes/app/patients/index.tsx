@@ -1,3 +1,5 @@
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { DotsVerticalIcon, PlusIcon, Pencil1Icon } from "@radix-ui/react-icons";
 import { ActionFunction, json, LoaderFunction } from "@remix-run/node";
 import { Form, Link, useFetcher, useLoaderData, useSearchParams } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
@@ -239,17 +241,11 @@ const namePrefixbyGender = {
   [Gender.Others]: "",
 };
 const PatientRow = ({ patient, editPatient }: PatientRowProps) => {
-  const fetcher = useFetcher();
-  const isDeleting =
-    fetcher.state === "submitting" &&
-    fetcher.submission?.formData.get("id") === patient.id.toString() &&
-    fetcher.submission?.formData.get("_action") === "delete";
-
   return (
     <TableBodyRow key={patient.id}>
       <TableCol className="whitespace-nowrap">{patient.attributes.rm_id}</TableCol>
       <TableCol className="whitespace-nowrap">
-        <Link to={`/app/patients/${patient.id}`}>
+        <Link to={`/app/patients/${patient.id}`} className="underline font-semibold">
           {namePrefixbyGender[patient.attributes.gender]} {patient.attributes.name}
         </Link>
       </TableCol>
@@ -257,32 +253,27 @@ const PatientRow = ({ patient, editPatient }: PatientRowProps) => {
       <TableCol className="">{patient.attributes.address}</TableCol>
       <TableCol className="whitespace-nowrap">{patient.attributes.phone}</TableCol>
       <TableCol className="inline-flex whitespace-nowrap">
-        <Button
-          iconLeft={<i className="fa-solid fa-pencil" />}
-          variant="raised"
-          color="secondary"
-          onClick={() => editPatient(patient)}
-        >
-          {/* Ubah */}
-        </Button>
-
-        {/* <fetcher.Form method="post">
-          <input type={"text"} hidden name="id" value={patient.id} readOnly />
-          <Button
-            iconLeft={<i className="fa-solid fa-trash" />}
-            disabled={isDeleting}
-            type="submit"
-            name="_action"
-            value="delete"
-            variant="raised"
-            color="error"
-          ></Button>
-        </fetcher.Form> */}
-        <Link to={`/app/outpatients/queue?patientId=${patient.id}`}>
-          <Button color="primary" iconLeft={<i className="fa-solid fa-plus"></i>}>
-            {/* Antrian */}
-          </Button>
-        </Link>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <Button aria-label="More actions" color="secondary">
+              <DotsVerticalIcon />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content className="w-48 rounded-lg px-2 py-1 shadow-md md:w-56 bg-white">
+              <DropdownMenu.Item className="cursor-default select-none rounded-md px-2 py-2 text-xs outline-none">
+                <button onClick={() => editPatient(patient)} className="flex flex-row items-center">
+                  <Pencil1Icon /> <span className="ml-2">Ubah Data</span>
+                </button>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item className="cursor-default select-none rounded-md px-2 py-2 text-xs outline-none">
+                <Link to={`/app/outpatients/queue?patientId=${patient.id}`} className="flex flex-row items-center">
+                  <PlusIcon /> <span className="ml-2">Antrian Rawat Jalan</span>
+                </Link>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
       </TableCol>
     </TableBodyRow>
   );

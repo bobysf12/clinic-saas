@@ -9,6 +9,7 @@ import {
   PatientRecord,
   PatientRecordInventory,
   PatientRecordPayload,
+  Polyclinic,
   StrapiFilterOperators,
   StrapiRequestError,
   StrapiRequestOption,
@@ -173,6 +174,7 @@ export const outpatientApi = {
       organization: number;
       status: OutPatientStatus;
       appointment_date: string; // ISO String
+      polyclinic: number;
     }
   ): Promise<StrapiResponse<OutPatient>> {
     return httpPost(token, "/api/outpatients", { data: outpatient });
@@ -311,5 +313,11 @@ export const treatmentsApi = {
   },
   async deletePatientRecordTreatment(token: string, id: number) {
     return httpDelete(token, `/api/patient-record-medical-treatments/${id}`);
+  },
+};
+
+export const polyclinicApi = {
+  async findAll(token: string, option?: StrapiRequestOption): Promise<StrapiResponse<Polyclinic[]>> {
+    return httpGet(token, "/api/polyclinics?" + generateStrapiQueryString(option));
   },
 };

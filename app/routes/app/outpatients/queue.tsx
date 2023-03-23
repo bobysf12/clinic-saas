@@ -1,14 +1,15 @@
 import { ActionFunction, json, LoaderFunction, redirect } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
-import { Link } from "react-router-dom";
+import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+import { ChangeEvent } from "react";
 import { z } from "zod";
 import { Button } from "~/components/button";
 import { Card } from "~/components/common/card";
 import { InputField, SelectField } from "~/components/common/form-elements";
-import { H2, H4, H5, H6 } from "~/components/common/typography";
+import { H4, H5 } from "~/components/common/typography";
+import { findAllPolyclinics } from "~/services/polyclinic.service";
 import { getOrgId, getToken } from "~/utils/session.server";
 import { doctorApi, outpatientApi, patientApi } from "~/utils/strapiApi.server";
-import { Doctor, Patient, StrapiFilterOperators, OutPatientStatus } from "~/utils/strapiApi.types";
+import { Doctor, OutPatientStatus, Patient, Polyclinic, StrapiFilterOperators } from "~/utils/strapiApi.types";
 
 type ActionData = {
   error?: {
@@ -22,6 +23,7 @@ type ActionData = {
 const createOutpatientQueueSchema = z.object({
   doctor: z.string().regex(/^\d+$/),
   patient: z.string().regex(/^\d+$/),
+  polyclinic: z.string().regex(/^\d+$/),
 });
 const deleteOutpatientQueueSchema = z.object({
   id: z.string().regex(/^\d+$/),
@@ -41,6 +43,7 @@ export const action: ActionFunction = async ({ request }) => {
         patient: Number(values.patient),
         organization: orgId!,
         status: OutPatientStatus.IN_QUEUE,
+        polyclinic: Number(values.polyclinic),
       });
       return redirect("/app/outpatients");
     }
@@ -66,6 +69,7 @@ export const action: ActionFunction = async ({ request }) => {
 type LoaderData = {
   patient?: Patient;
   doctors: Doctor[];
+  polyclinics: Polyclinic[];
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -88,6 +92,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     });
     patient = patientResponse.data;
   }
+  const polyclinics = await findAllPolyclinics(session!, orgId!);
 
   const doctors = await doctorApi.getDoctors(session!, {
     filters: {
@@ -102,11 +107,20 @@ export const loader: LoaderFunction = async ({ request }) => {
   return {
     patient,
     doctors: doctors.data,
+    polyclinics: polyclinics.data,
   } as LoaderData;
 };
 
 export default function NewQueue() {
-  const { doctors, patient } = useLoaderData<LoaderData>();
+  const { patient, polyclinics } = useLoaderData<LoaderData>();
+
+  const doctorsFetcher = useFetcher<{ doctors: Doctor[] }>();
+
+  const onChangePolyclinic = (evt: ChangeEvent<HTMLSelectElement>) => {
+    const polyclinicId = Number(evt.target.value);
+    doctorsFetcher.load(`/app/polyclinics/${polyclinicId}/doctors`);
+  };
+
   return (
     <>
       <Card>
@@ -118,9 +132,17 @@ export default function NewQueue() {
             <H5 className="mb-4">Tambah Antrian</H5>
             <input type="text" value={patient?.id} name="patient" hidden readOnly />
             <InputField label="Pasien" name="name" required defaultValue={patient?.attributes.name} disabled />
+            <SelectField label="Poliklinik" name="polyclinic" required onChange={onChangePolyclinic}>
+              <option value="">-Pilih-</option>
+              {polyclinics.map((polyclinic) => (
+                <option key={polyclinic.id} value={polyclinic.id}>
+                  {polyclinic.attributes.name}
+                </option>
+              ))}
+            </SelectField>
             <SelectField label="Dokter" name="doctor" required>
               <option value="">-Pilih-</option>
-              {doctors.map((doctor) => (
+              {doctorsFetcher.data?.doctors?.map((doctor) => (
                 <option key={doctor.id} value={doctor.id}>
                   {doctor.attributes.name}
                 </option>

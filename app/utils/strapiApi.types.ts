@@ -117,6 +117,7 @@ export enum OutPatientStatus {
 export type OutPatient = StrapiEntry<{
   patient: PopulateData<Patient>;
   doctor: PopulateData<Doctor>;
+  polyclinic: PopulateData<Polyclinic>;
   appointment_date: string;
   status: OutPatientStatus;
   patient_record: PopulateData<PatientRecord>;
@@ -167,4 +168,9 @@ export type MedicalTreatment = StrapiEntry<{
   name: string;
   description: string;
   price: number;
+}>;
+
+export type Polyclinic = StrapiEntry<{
+  name: string;
+  description: string;
 }>;

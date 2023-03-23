@@ -66,20 +66,20 @@ export const action: ActionFunction = async ({ request }) => {
         });
         break;
       }
-      case FormActionName.CREATE: {
-        const newOutpatient = createOutpatientSchema.parse(formData);
-        const result = await outpatientApi.createOutpatient(session!, {
-          ...newOutpatient,
-          organization: orgId!,
-          status: OutPatientStatus.IN_QUEUE,
-          appointment_date: newOutpatient.appointment_date.toISOString(),
-        });
+      // case FormActionName.CREATE: {
+      //   const newOutpatient = createOutpatientSchema.parse(formData);
+      //   const result = await outpatientApi.createOutpatient(session!, {
+      //     ...newOutpatient,
+      //     organization: orgId!,
+      //     status: OutPatientStatus.IN_QUEUE,
+      //     appointment_date: newOutpatient.appointment_date.toISOString(),
+      //   });
 
-        if (result.data.id) {
-          actionData.result = result.data;
-        }
-        break;
-      }
+      //   if (result.data.id) {
+      //     actionData.result = result.data;
+      //   }
+      //   break;
+      // }
 
       case FormActionName.PAY:
       case FormActionName.CONTINUE: {

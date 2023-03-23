@@ -1,7 +1,16 @@
 import { LoaderFunction } from "@remix-run/node";
-import { NavLink, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
+import { Button } from "~/components/button";
 
-import { Card } from "~/components/common/card";
+import {
+  Table,
+  TableBody,
+  TableBodyRow,
+  TableCol,
+  TableContainer,
+  TableHead,
+  TableHeadRow,
+} from "~/components/common/table";
 
 import { OUTPATIENT_STATUS_TEXT_MAP } from "~/services/outpatient.service";
 import * as patientService from "~/services/patient.service";
@@ -34,21 +43,37 @@ export default function Outpatients() {
   const { outpatients } = useLoaderData<LoaderData>();
 
   return (
-    <>
-      {outpatients.length === 0 && <Card>Tidak ada data</Card>}
-      {outpatients.map((outpatient) => (
-        <NavLink to={`/app/outpatients/${outpatient.id}`} key={outpatient.id}>
-          <Card key={outpatient.id} className="mb-2">
-            <div className="flex flex-row justify-between items-center">
-              <h5>
-                {formatDateTime(outpatient.attributes.appointment_date, "dd LLL yyyy")} -{" "}
-                {outpatient.attributes.doctor.data.attributes.name}
-              </h5>
-              <span>{OUTPATIENT_STATUS_TEXT_MAP[outpatient.attributes.status]}</span>
-            </div>
-          </Card>
-        </NavLink>
-      ))}
-    </>
+    <TableContainer className="mt-6">
+      <div className="inline-block min-w-full align-middle">
+        <div className="overflow-hidden">
+          <Table className="table-fixed min-w-full">
+            <TableHead>
+              <TableHeadRow>
+                <TableCol>Tanggal Visit</TableCol>
+                <TableCol>Poli</TableCol>
+                <TableCol>Dokter</TableCol>
+                <TableCol>Status</TableCol>
+                <TableCol>&nbsp;</TableCol>
+              </TableHeadRow>
+            </TableHead>
+            <TableBody>
+              {outpatients.map((outpatient) => (
+                <TableBodyRow key={outpatient.id}>
+                  <TableCol>{formatDateTime(outpatient.attributes.appointment_date, "dd LLL yyyy")}</TableCol>
+                  <TableCol>{outpatient.attributes.polyclinic.data?.attributes.name || "-"}</TableCol>
+                  <TableCol>{outpatient.attributes.doctor.data.attributes.name}</TableCol>
+                  <TableCol>{OUTPATIENT_STATUS_TEXT_MAP[outpatient.attributes.status]}</TableCol>
+                  <TableCol>
+                    <Link to={`/app/outpatients/${outpatient.id}`}>
+                      <Button color="primary" iconLeft={<i className="fa-solid fa-up-right-from-square"></i>} />
+                    </Link>
+                  </TableCol>
+                </TableBodyRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </TableContainer>
   );
 }
