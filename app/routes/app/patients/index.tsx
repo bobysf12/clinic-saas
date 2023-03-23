@@ -7,6 +7,7 @@ import { z, ZodError } from "zod";
 import { Button } from "~/components/button";
 import { Card } from "~/components/common/card";
 import { Dialog, DialogActions, DialogContent } from "~/components/common/dialog";
+import { DropdownMenuContent, DropdownMenuItem } from "~/components/common/dropdown-menu";
 import { InputField, SelectField } from "~/components/common/form-elements";
 import { PaginationCard } from "~/components/common/pagination-card";
 import {
@@ -259,20 +260,18 @@ const PatientRow = ({ patient, editPatient }: PatientRowProps) => {
               <DotsVerticalIcon />
             </Button>
           </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content className="w-48 rounded-lg px-2 py-1 shadow-md md:w-56 bg-white">
-              <DropdownMenu.Item className="cursor-default select-none rounded-md px-2 py-2 text-xs outline-none">
-                <button onClick={() => editPatient(patient)} className="flex flex-row items-center">
-                  <Pencil1Icon /> <span className="ml-2">Ubah Data</span>
-                </button>
-              </DropdownMenu.Item>
-              <DropdownMenu.Item className="cursor-default select-none rounded-md px-2 py-2 text-xs outline-none">
-                <Link to={`/app/outpatients/queue?patientId=${patient.id}`} className="flex flex-row items-center">
-                  <PlusIcon /> <span className="ml-2">Antrian Rawat Jalan</span>
-                </Link>
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
+          <DropdownMenuContent>
+            <DropdownMenuItem>
+              <button onClick={() => editPatient(patient)} className="flex flex-row items-center">
+                <Pencil1Icon /> <span className="ml-2">Ubah Data</span>
+              </button>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link to={`/app/outpatients/queue?patientId=${patient.id}`} className="flex flex-row items-center">
+                <PlusIcon /> <span className="ml-2">Antrian Rawat Jalan</span>
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu.Root>
       </TableCol>
     </TableBodyRow>
