@@ -174,6 +174,7 @@ export const outpatientApi = {
       organization: number;
       status: OutPatientStatus;
       appointment_date: string; // ISO String
+      registration_date: string;
       polyclinic: number;
     }
   ): Promise<StrapiResponse<OutPatient>> {

@@ -1,8 +1,11 @@
+import { DropdownMenu, DropdownMenuSeparator, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { ArrowRightIcon, DotsVerticalIcon } from "@radix-ui/react-icons";
 import { ActionFunction, json, LoaderFunction, redirect } from "@remix-run/node";
 import { Form, Link, useFetcher, useLoaderData, useSearchParams } from "@remix-run/react";
 import { z, ZodError } from "zod";
 import { Button } from "~/components/button";
 import { Card } from "~/components/common/card";
+import { DropdownMenuContent, DropdownMenuItem } from "~/components/common/dropdown-menu";
 import { InputField } from "~/components/common/form-elements";
 import { PaginationCard } from "~/components/common/pagination-card";
 import {
@@ -66,20 +69,6 @@ export const action: ActionFunction = async ({ request }) => {
         });
         break;
       }
-      // case FormActionName.CREATE: {
-      //   const newOutpatient = createOutpatientSchema.parse(formData);
-      //   const result = await outpatientApi.createOutpatient(session!, {
-      //     ...newOutpatient,
-      //     organization: orgId!,
-      //     status: OutPatientStatus.IN_QUEUE,
-      //     appointment_date: newOutpatient.appointment_date.toISOString(),
-      //   });
-
-      //   if (result.data.id) {
-      //     actionData.result = result.data;
-      //   }
-      //   break;
-      // }
 
       case FormActionName.PAY:
       case FormActionName.CONTINUE: {
@@ -239,7 +228,7 @@ export default function Index() {
                 <TableHeadRow>
                   <TableCol>Pasien</TableCol>
                   <TableCol>Dokter</TableCol>
-                  <TableCol>Tanggal Janji</TableCol>
+                  <TableCol>Waktu Registrasi</TableCol>
                   <TableCol>Status</TableCol>
                   <TableCol>&nbsp;</TableCol>
                 </TableHeadRow>
@@ -254,7 +243,7 @@ export default function Index() {
                 )}
                 {outpatients.map((outpatient) => (
                   <TableBodyRow key={outpatient.id}>
-                    <TableCol className="font-medium">
+                    <TableCol className="font-medium underline">
                       <Link to={`/app/patients/${outpatient.attributes.patient.data.id}`}>
                         {outpatient.attributes.patient.data.attributes.name}
                       </Link>
@@ -262,18 +251,18 @@ export default function Index() {
                     <TableCol>{outpatient.attributes.doctor.data.attributes.name}</TableCol>
                     <TableCol>
                       {formatDateTime(
-                        outpatient.attributes.appointment_date || outpatient.attributes.createdAt,
+                        outpatient.attributes.registration_date ||
+                          outpatient.attributes.appointment_date ||
+                          outpatient.attributes.createdAt,
                         "dd LLL yyyy HH:mm"
                       )}
                     </TableCol>
                     <TableCol>{OUTPATIENT_STATUS_TEXT_MAP[outpatient.attributes.status]}</TableCol>
                     <TableCol>
-                      <fetcher.Form method="post">
-                        <input type={"text"} hidden name="id" value={outpatient.id} readOnly />
-                        {outpatient.attributes.status === OutPatientStatus.IN_QUEUE && (
+                      {/* {outpatient.attributes.status === OutPatientStatus.IN_QUEUE && (
                           <div className="flex flex-row">
                             <Button color="primary" name="_action" value={FormActionName.CONTINUE}>
-                              Lanjut
+                              <ArrowRightIcon />
                             </Button>
                             <Button
                               color="error"
@@ -285,8 +274,8 @@ export default function Index() {
                               Batalkan
                             </Button>
                           </div>
-                        )}
-                        {outpatient.attributes.status === OutPatientStatus.IN_PROGRESS && (
+                        )} */}
+                      {/* {outpatient.attributes.status === OutPatientStatus.IN_PROGRESS && (
                           <div className="flex flex-row">
                             <Link to={`${outpatient.id}`}>
                               <Button color="secondary">SOAP</Button>
@@ -295,21 +284,91 @@ export default function Index() {
                               Lanjut Bayar
                             </Button>
                           </div>
-                        )}
-                        {outpatient.attributes.status === OutPatientStatus.WAITING_FOR_PAYMENT && (
+                        )} */}
+                      {/* {outpatient.attributes.status === OutPatientStatus.WAITING_FOR_PAYMENT && (
                           <div className="flex flex-row">
                             <Button color="secondary">Cetak invoice</Button>
                             <Button color="primary" name="_action" value={FormActionName.DONE}>
                               Selesai
                             </Button>
                           </div>
-                        )}
-                        {outpatient.attributes.status === OutPatientStatus.DONE && (
+                        )} */}
+                      {/* {outpatient.attributes.status === OutPatientStatus.DONE && (
                           <div className="flex flex-row">
                             <Button color="secondary">Cetak invoice</Button>
                           </div>
-                        )}
-                      </fetcher.Form>
+                        )} */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <Button aria-label="More actions" color="secondary">
+                            <DotsVerticalIcon />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          {outpatient.attributes.status === OutPatientStatus.IN_QUEUE && (
+                            <DropdownMenuItem>
+                              <Button
+                                color="primary"
+                                name="_action"
+                                value={FormActionName.CONTINUE}
+                                className="px-0 py-0 m-0 text-xs"
+                                variant="text"
+                                onClick={() =>
+                                  fetcher.submit(
+                                    { id: outpatient.id.toString(), _action: FormActionName.CONTINUE },
+                                    { method: "post" }
+                                  )
+                                }
+                              >
+                                Mulai proses
+                              </Button>
+                            </DropdownMenuItem>
+                          )}
+                          {outpatient.attributes.status === OutPatientStatus.IN_PROGRESS && (
+                            <>
+                              <DropdownMenuItem>
+                                <Link to={`${outpatient.id}/ttv`}>TTV</Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Link to={`${outpatient.id}/soap`}>SOAP</Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Link to={`${outpatient.id}/recipe`}>Resep Obat</Link>
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          {[OutPatientStatus.DONE, OutPatientStatus.WAITING_FOR_PAYMENT].includes(
+                            outpatient.attributes.status
+                          ) && (
+                            <DropdownMenuItem>
+                              <Link to={`${outpatient.id}/invoice`}>Cetak Invoice</Link>
+                            </DropdownMenuItem>
+                          )}
+                          {outpatient.attributes.status === OutPatientStatus.IN_QUEUE && (
+                            <>
+                              <DropdownMenuSeparator className="my-1 h-px bg-gray-200" />
+                              <DropdownMenuItem>
+                                <Button
+                                  color="error"
+                                  variant="text"
+                                  type="submit"
+                                  name="_action"
+                                  value={FormActionName.CANCEL}
+                                  className="px-0 py-0 m-0 text-xs"
+                                  onClick={() =>
+                                    fetcher.submit(
+                                      { id: outpatient.id.toString(), _action: FormActionName.CANCEL },
+                                      { method: "post" }
+                                    )
+                                  }
+                                >
+                                  Batalkan
+                                </Button>
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCol>
                   </TableBodyRow>
                 ))}

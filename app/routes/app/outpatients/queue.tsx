@@ -39,6 +39,7 @@ export const action: ActionFunction = async ({ request }) => {
       const values = createOutpatientQueueSchema.parse(formData);
       await outpatientApi.createOutpatient(token!, {
         appointment_date: new Date().toISOString(),
+        registration_date: new Date().toISOString(),
         doctor: Number(values.doctor),
         patient: Number(values.patient),
         organization: orgId!,

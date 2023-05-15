@@ -23,6 +23,7 @@ export const DropdownMenuItem = React.forwardRef<HTMLDivElement, DropdownMenuPri
     return (
       <DropdownMenuPrimitive.Item
         ref={forwardedRef}
+        {...props}
         className={clsx("cursor-default select-none rounded-md px-2 py-2 text-xs outline-none", props.className)}
       >
         {children}

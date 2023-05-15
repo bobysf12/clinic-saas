@@ -119,6 +119,7 @@ export type OutPatient = StrapiEntry<{
   doctor: PopulateData<Doctor>;
   polyclinic: PopulateData<Polyclinic>;
   appointment_date: string;
+  registration_date: string;
   status: OutPatientStatus;
   patient_record: PopulateData<PatientRecord>;
 }>;
